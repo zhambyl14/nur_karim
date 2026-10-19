@@ -1,0 +1,312 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (next-themes sets class="dark" on <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Nur Karim design tokens (from the Claude Design mockup)
+   Navy #0b1830 / #10223f, Bordeaux #7d1a35, Gold #c8a35a,
+   Lora (titles, prices, hadith) + Manrope (UI)
+   --------------------------------------------------------------------------- */
+:root {
+  --nk-page: #f4f5f8;
+  --nk-card: #ffffff;
+  --nk-card-2: #f8f9fb;
+  --nk-subtle: #f0f1f5;
+  --nk-chip: #eef0f5;
+  --nk-line: #e6e8ee;
+  --nk-line-strong: #d9dce3;
+  --nk-line-soft: #eef0f4;
+
+  --nk-ink: #121a2b;
+  --nk-ink-2: #3d4556;
+  --nk-muted: #5d6678;
+  --nk-faint: #8a92a3;
+
+  --nk-navy: #0b1830;
+  --nk-navy-2: #10223f;
+  --nk-navy-3: #172e52;
+
+  --nk-primary: #10223f;
+  --nk-primary-hover: #1b3561;
+  --nk-on-primary: #ffffff;
+
+  --nk-wine: #7d1a35;
+  --nk-wine-hover: #93203f;
+  --nk-wine-ink: #7d1a35;
+  --nk-wine-soft: #f6e9ec;
+  --nk-wine-line: #efd5dc;
+
+  --nk-gold: #c8a35a;
+  --nk-gold-soft: rgba(200, 163, 90, 0.18);
+
+  --nk-success: #1f6b4a;
+  --nk-success-soft: #e6f2ec;
+  --nk-info: #1f3f75;
+  --nk-info-soft: #e8eef8;
+  --nk-warning: #7a5a1d;
+  --nk-warning-soft: #f5efe1;
+  --nk-danger: #b4232c;
+  --nk-danger-soft: #fdeced;
+  --nk-violet: #5b3fa8;
+  --nk-violet-soft: #efeafc;
+
+  --nk-shadow-color: 16 34 63;
+  --nk-overlay: rgba(11, 24, 48, 0.55);
+  color-scheme: light;
+}
+
+.dark {
+  --nk-page: #070e1c;
+  --nk-card: #0e1a2e;
+  --nk-card-2: #12213a;
+  --nk-subtle: #142540;
+  --nk-chip: #172a48;
+  --nk-line: #1e2f4d;
+  --nk-line-strong: #2a3d60;
+  --nk-line-soft: #172742;
+
+  --nk-ink: #e8ecf4;
+  --nk-ink-2: #c3cad8;
+  --nk-muted: #98a2b5;
+  --nk-faint: #6f7b91;
+
+  --nk-navy: #081226;
+  --nk-navy-2: #0f1f3a;
+  --nk-navy-3: #1a3358;
+
+  --nk-primary: #2b4778;
+  --nk-primary-hover: #36558d;
+  --nk-on-primary: #ffffff;
+
+  --nk-wine: #8e2141;
+  --nk-wine-hover: #a32a4d;
+  --nk-wine-ink: #f29ab2;
+  --nk-wine-soft: #2a1326;
+  --nk-wine-line: #4b1f36;
+
+  --nk-gold: #d6b26d;
+  --nk-gold-soft: rgba(214, 178, 109, 0.16);
+
+  --nk-success: #6fd6a8;
+  --nk-success-soft: #0f2a20;
+  --nk-info: #9bbaf0;
+  --nk-info-soft: #13243f;
+  --nk-warning: #e7c47e;
+  --nk-warning-soft: #2b2313;
+  --nk-danger: #ff8f8f;
+  --nk-danger-soft: #2f1416;
+  --nk-violet: #c3b2f5;
+  --nk-violet-soft: #221a3d;
+
+  --nk-shadow-color: 0 0 0;
+  --nk-overlay: rgba(2, 6, 14, 0.7);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-page: var(--nk-page);
+  --color-card: var(--nk-card);
+  --color-card-2: var(--nk-card-2);
+  --color-subtle: var(--nk-subtle);
+  --color-chip: var(--nk-chip);
+  --color-line: var(--nk-line);
+  --color-line-strong: var(--nk-line-strong);
+  --color-line-soft: var(--nk-line-soft);
+  --color-ink: var(--nk-ink);
+  --color-ink-2: var(--nk-ink-2);
+  --color-muted: var(--nk-muted);
+  --color-faint: var(--nk-faint);
+  --color-navy: var(--nk-navy);
+  --color-navy-2: var(--nk-navy-2);
+  --color-navy-3: var(--nk-navy-3);
+  --color-primary: var(--nk-primary);
+  --color-primary-hover: var(--nk-primary-hover);
+  --color-on-primary: var(--nk-on-primary);
+  --color-wine: var(--nk-wine);
+  --color-wine-hover: var(--nk-wine-hover);
+  --color-wine-ink: var(--nk-wine-ink);
+  --color-wine-soft: var(--nk-wine-soft);
+  --color-wine-line: var(--nk-wine-line);
+  --color-gold: var(--nk-gold);
+  --color-gold-soft: var(--nk-gold-soft);
+  --color-success: var(--nk-success);
+  --color-success-soft: var(--nk-success-soft);
+  --color-info: var(--nk-info);
+  --color-info-soft: var(--nk-info-soft);
+  --color-warning: var(--nk-warning);
+  --color-warning-soft: var(--nk-warning-soft);
+  --color-danger: var(--nk-danger);
+  --color-danger-soft: var(--nk-danger-soft);
+  --color-violet: var(--nk-violet);
+  --color-violet-soft: var(--nk-violet-soft);
+  --color-overlay: var(--nk-overlay);
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
+
+  --shadow-card: 0 1px 2px rgb(var(--nk-shadow-color) / 0.05);
+  --shadow-lift: 0 18px 36px rgb(var(--nk-shadow-color) / 0.12);
+  --shadow-pop: 0 20px 50px rgb(var(--nk-shadow-color) / 0.25);
+  --shadow-cover: 0 30px 60px rgb(0 0 0 / 0.45);
+
+  --animate-fade-in: nk-fade-in 0.35s ease-out both;
+  --animate-slide-up: nk-slide-up 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-scale-in: nk-scale-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-float: nk-float 6s ease-in-out infinite;
+  --animate-shimmer: nk-shimmer 1.4s linear infinite;
+  --animate-wiggle: nk-wiggle 0.6s ease-in-out;
+  --animate-pop: nk-pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1.4);
+
+  @keyframes nk-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes nk-slide-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes nk-scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes nk-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes nk-shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes nk-wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-6deg); }
+    75% { transform: rotate(6deg); }
+  }
+  @keyframes nk-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--nk-page);
+    color: var(--nk-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--nk-wine);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--nk-gold);
+    outline-offset: 2px;
+  }
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reusable brand utilities
+   --------------------------------------------------------------------------- */
+@utility nk-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  @media (width >= 48rem) {
+    padding-inline: 32px;
+  }
+  @media (width >= 80rem) {
+    padding-inline: 56px;
+  }
+}
+
+/* small rotated square used in the logo, chips and nav */
+@utility nk-diamond {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: var(--nk-wine);
+  transform: rotate(45deg);
+  flex: none;
+}
+
+/* navy hero with bordeaux glow */
+@utility nk-hero-bg {
+  background:
+    radial-gradient(900px 420px at 85% 30%, rgba(125, 26, 53, 0.38), transparent 70%),
+    linear-gradient(180deg, var(--nk-navy), var(--nk-navy-2));
+}
+
+@utility nk-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--nk-subtle) 0%,
+    var(--nk-line-soft) 40%,
+    var(--nk-subtle) 80%
+  );
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility nk-safe-bottom {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+@utility text-balance-nk {
+  text-wrap: balance;
+}
+
+/* Thin custom scrollbar for panels */
+@utility nk-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--nk-line-strong) transparent;
+}
+
+/* Reader protection: no selection, no drag, no callout */
+@utility nk-protect {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+
+@media print {
+  .nk-no-print,
+  .nk-no-print * {
+    display: none !important;
+  }
+}

@@ -1,0 +1,38 @@
+import type { Dictionary } from "../kk";
+
+const nav: Dictionary["nav"] = {
+  home: "Главная",
+  catalog: "Каталог",
+  newBooks: "Новинки",
+  authors: "Авторы",
+  ebooks: "Электронные",
+  gifts: "Подарить",
+  myBooks: "Мои книги",
+  myBooksShort: "Мои книги",
+  cart: "Корзина",
+  account: "Профиль",
+  messages: "Сообщения",
+  orders: "Мои заказы",
+  favorites: "Избранное",
+  myGifts: "Мои подарки",
+  settings: "Настройки",
+  admin: "Админ-панель",
+  login: "Войти",
+  register: "Регистрация",
+  logout: "Выйти",
+  searchPlaceholder: "Название книги, автор или категория…",
+  searchShort: "Поиск книг…",
+  footer: {
+    shop: "Магазин",
+    help: "Помощь",
+    about: "О нас",
+    delivery: "Доставка",
+    payment: "Оплата",
+    contacts: "Контакты",
+    gifts: "Подари другу",
+    rights: "© {year} Nur Karim. Все права защищены.",
+    description: "Магазин религиозных, исторических и познавательных книг. Курьер по Астане, Казпочта по Казахстану.",
+  },
+};
+
+export default nav;

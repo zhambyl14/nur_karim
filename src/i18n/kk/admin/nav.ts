@@ -1,0 +1,26 @@
+const nav = {
+  title: "Админ панелі",
+  badge: "ADMIN",
+  overview: "Шолу",
+  orders: "Тапсырыстар",
+  ordersShort: "Тапсырыс",
+  books: "Кітаптар",
+  genres: "Санаттар",
+  promotions: "Акциялар",
+  promoCodes: "Промокодтар",
+  banners: "Баннерлер",
+  messages: "Хабарламалар",
+  reviews: "Пікірлер",
+  customers: "Клиенттер",
+  settings: "Баптаулар",
+  more: "Тағы",
+  toStore: "Дүкенге өту",
+  role: "Әкімші",
+  addBook: "Кітап қосу",
+  searchPlaceholder: "Тапсырыс, кітап, клиент…",
+  greetingMorning: "Қайырлы таң, {name}",
+  greetingDay: "Қайырлы күн, {name}",
+  greetingEvening: "Қайырлы кеш, {name}",
+};
+
+export default nav;
