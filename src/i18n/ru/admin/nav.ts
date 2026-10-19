@@ -15,6 +15,7 @@ const nav: Dictionary["admin"]["nav"] = {
   reviews: "Отзывы",
   customers: "Клиенты",
   settings: "Настройки",
+  activity: "Журнал действий",
   more: "Ещё",
   toStore: "В магазин",
   role: "Администратор",

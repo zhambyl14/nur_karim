@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          changes: Json
+          created_at: string
+          entity: string
+          entity_id: string | null
+          id: number
+          label: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          changes?: Json
+          created_at?: string
+          entity: string
+          entity_id?: string | null
+          id?: never
+          label?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          changes?: Json
+          created_at?: string
+          entity?: string
+          entity_id?: string | null
+          id?: never
+          label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       banners: {
         Row: {
           button_kk: string
@@ -669,6 +710,38 @@ export type Database = {
           {
             foreignKeyName: "messages_sender_id_fkey"
             columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_log: {
+        Row: {
+          created_at: string
+          id: number
+          kind: string
+          ref: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          kind: string
+          ref?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          kind?: string
+          ref?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_log_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1585,6 +1658,7 @@ export type Database = {
         Args: { p_phone: string; p_user: string }
         Returns: undefined
       }
+      audit_label: { Args: { p_row: Json; p_table: string }; Returns: string }
       best_price: {
         Args: {
           p_book_id: string

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   BadgePercent,
   BookOpen,
+  History,
   Image as ImageIcon,
   LayoutGrid,
   MessageCircle,
@@ -58,6 +59,7 @@ function useNav(counters: AdminCounters): NavItem[] {
     { href: "/admin/reviews", key: "admin.nav.reviews", icon: <Star className="size-[18px]" /> },
     { href: "/admin/customers", key: "admin.nav.customers", icon: <Users className="size-[18px]" /> },
     { href: "/admin/settings", key: "admin.nav.settings", icon: <Settings className="size-[18px]" /> },
+    { href: "/admin/activity", key: "admin.nav.activity", icon: <History className="size-[18px]" /> },
   ];
 }
 
@@ -116,13 +118,13 @@ export function AdminShell({
           <div className="flex items-center gap-2 px-1">
             <ThemeToggle />
             <LocaleSwitch />
-            <Link
-              href="/"
-              className="ml-auto inline-flex h-10 items-center gap-2 rounded-full border border-white/15 px-3.5 text-xs font-bold text-white/85 hover:bg-white/10"
-            >
-              <Store className="size-4" /> {t("admin.nav.toStore")}
-            </Link>
           </div>
+          <Link
+            href="/"
+            className="flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/15 px-3.5 text-xs font-bold text-white/85 hover:bg-white/10"
+          >
+            <Store className="size-4" /> {t("admin.nav.toStore")}
+          </Link>
           <div className="flex items-center gap-2.5 rounded-[14px] bg-white/[0.06] p-3.5">
             <Avatar name={user.fullName || user.phone} size={34} />
             <div className="min-w-0">

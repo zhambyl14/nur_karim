@@ -13,6 +13,7 @@ const nav = {
   reviews: "Пікірлер",
   customers: "Клиенттер",
   settings: "Баптаулар",
+  activity: "Әрекеттер журналы",
   more: "Тағы",
   toStore: "Дүкенге өту",
   role: "Әкімші",

@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nur Karim — кітап дүкені
 
-## Getting Started
+Діни, тарихи және танымдық кітаптарға арналған интернет-дүкен: қағаз және
+электронды кітаптар, Астана бойынша курьер, Қазақстан бойынша Қазпошта,
+«Досыңа сыйла» сыйлық жүйесі, Telegram арқылы тіркелу, қуатты админ панелі.
+Телефонда, планшетте және ноутбукта жұмыс істейді, ақ және қара режимі бар,
+қазақ және орыс тілдерінде.
 
-First, run the development server:
+**Технологиялар:** Next.js 16 · React 19 · Tailwind CSS 4 · Supabase (Postgres, Auth, Storage, Realtime, Edge Functions).
+
+---
+
+## 1. Компьютерде іске қосу
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env.local` файлы дайын (Supabase кілттері сонда). Файлды ешкімге жібермеңіз — онда құпия кілттер бар.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Тест аккаунттары (тек тексеруге арналған, кейін өшіріп тастауға болады):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Рөлі | Телефон | Құпиясөз |
+|------|---------|----------|
+| Клиент | 8 700 000 00 01 | `NurKarim-test-1` |
+| Админ | 8 700 000 00 02 | `NurKarim-admin-1` |
 
-## Learn More
+## 2. Админ аккаунтын жасау
 
-To learn more about Next.js, take a look at the following resources:
+Сайтта ешкім өзін админ ретінде тіркей алмайды. Өз нөміріңізді админ қылу үшін:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# жаңа аккаунт (Telegram-сыз) — бірден админ
+node scripts/create-user.mjs 87001234567 "күшті-құпиясөз" admin "Атыңыз Тегіңіз"
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# сайтта Telegram арқылы тіркелген аккаунтты админ қылу
+node scripts/create-user.mjs 87001234567 --promote
+```
 
-## Deploy on Vercel
+## 3. Telegram бот (тіркелу және хабарламалар)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Telegram-да [@BotFather](https://t.me/BotFather) → `/newbot` → бот атын және username беріңіз (мысалы `NurKarimBot`).
+2. BotFather берген **токенді** `.env.local` файлына жазыңыз:
+   ```
+   TELEGRAM_BOT_TOKEN=123456:ABC...
+   NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=NurKarimBot
+   ```
+3. Webhook пен бот командаларын орнату:
+   ```bash
+   node scripts/set-telegram-webhook.mjs
+   ```
+4. Сайттағы админ аккаунтыңызға Telegram-ды байлау: ботқа `/start` жазып, нөміріңізбен бөлісіңіз —
+   бот сіздің аккаунтыңызды таниды, содан кейін жаңа тапсырыстар мен хабарламалар туралы
+   хабарлама келеді.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Тіркелу жолы: сайттағы «Тіркелу» → Telegram бот → «📱 Тіркелу» (нөмірмен бөлісу) →
+боттан келген сілтеме → аты-жөні мен құпиясөз → дайын. Құпиясөзді ұмытса — ботқа `/reset`.
+
+## 4. Интернетке шығару (Vercel)
+
+1. Кодты GitHub-қа жүктеңіз (жеке репозиторий).
+2. [vercel.com](https://vercel.com) → **Add New → Project** → репозиторийді таңдаңыз.
+3. **Environment Variables** бөліміне `.env.local` ішіндегі айнымалыларды қосыңыз,
+   `NEXT_PUBLIC_SITE_URL` мәнін нақты доменге ауыстырыңыз (мысалы `https://nurkarim.kz`).
+4. Deploy. Содан кейін:
+   - `.env.local` ішінде де `NEXT_PUBLIC_SITE_URL` мәнін доменге ауыстырып,
+     `node scripts/set-telegram-webhook.mjs` скриптін қайта іске қосыңыз (боттағы сілтемелер домен арқылы ашылады);
+   - Supabase → Authentication → URL Configuration → **Site URL** = домен.
+
+## 5. Пайдалы командалар
+
+| Команда | Не істейді |
+|---------|------------|
+| `npm run dev` | әзірлеу сервері |
+| `npm run build && npm start` | production нұсқасы |
+| `npx tsc --noEmit` / `npx eslint src` | типтер мен код сапасын тексеру |
+| `node scripts/test-db-flows.mjs` | тапсырыс, төлем, промокод, сыйлық логикасын базада тексеру |
+| `node scripts/seed-demo-ebooks.mjs` | демо электронды кітаптардың беттерін жасау |
+| `node scripts/generate-brand-assets.mjs` | иконкалар мен OG-суретті қайта жасау |
+| `npx -y supabase@2.121.0 db push --linked` | жаңа миграцияларды базаға жүктеу |
+
+Демо кітаптарды (дизайндағы 12 кітап, демо акция мен промокод) админ панеліндегі
+**Баптаулар → Демо деректерді өшіру** батырмасымен бір рет басып өшіре аласыз.
+
+## 6. Құрылым
+
+- `docs/SPEC.md` — толық функционал сипаттамасы
+- `docs/ARCHITECTURE.md` — код ережелері мен құрылымы
+- `supabase/migrations` — база схемасы, RLS қауіпсіздік ережелері, бизнес-логика (тапсырыс, баға, сыйлық)
+- `supabase/functions/telegram-bot` — Telegram бот
+- `design/` — Claude Design жасаған бастапқы дизайн

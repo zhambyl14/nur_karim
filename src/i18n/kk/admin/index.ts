@@ -10,6 +10,7 @@ import promotions from "./promotions";
 import promoCodes from "./promoCodes";
 import banners from "./banners";
 import messages from "./messages";
+import activity from "./activity";
 
 const admin = {
   nav,
@@ -24,6 +25,7 @@ const admin = {
   promoCodes,
   banners,
   messages,
+  activity,
 };
 
 export default admin;
