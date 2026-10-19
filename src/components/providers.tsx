@@ -31,7 +31,15 @@ export function Providers({
   children: ReactNode;
 }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      // The theme script must run only from the server HTML. On the client React
+      // would warn about rendering a <script>, so it becomes an inert data block.
+      scriptProps={{ type: typeof window === "undefined" ? "text/javascript" : "application/json" }}
+    >
       <I18nProvider locale={locale} dict={dict}>
         {children}
         <ConfirmHost />
