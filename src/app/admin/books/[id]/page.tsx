@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { BOOK_LANGUAGES, type BookLanguage } from "@/lib/constants";
+import { formatDate } from "@/lib/format";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { Badge } from "@/components/ui/badge";
 import { BookForm, type BookFormValues } from "@/components/admin/books/book-form";
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function EditBookPage({ params }: { params: Params }) {
   await requireAdmin();
   const { id } = await params;
-  const { t } = await getI18n();
+  const { t, locale } = await getI18n();
   const book = await loadBook(id);
   if (!book) notFound();
 
@@ -95,6 +96,8 @@ export default async function EditBookPage({ params }: { params: Params }) {
           rating_count: book.rating_count,
           created_at: book.created_at,
           updated_at: book.updated_at,
+          created_label: formatDate(book.created_at, locale),
+          updated_label: formatDate(book.updated_at, locale),
           ebook_page_count: book.ebook_page_count,
           ebook_version: book.ebook_version,
           ordered_units: orderedUnits,

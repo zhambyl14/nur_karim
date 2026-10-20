@@ -159,7 +159,7 @@ function esc(text) {
 /** Pango text block → transparent PNG buffer + size */
 async function text(str, { size = 36, color = C.ink, width = TEXT_W, align = "left", justify = false, spacing = 0, letterSpacing = 0 } = {}) {
   const ls = letterSpacing ? ` letter_spacing="${Math.round(letterSpacing * 1024)}"` : "";
-  const markup = `<span foreground="${color}"${ls}>${esc(str.replace(/ —/g, "00a0—"))}</span>`;
+  const markup = `<span foreground="${color}"${ls}>${esc(str.replace(/ —/g, " —"))}</span>`;
   const buffer = await sharp({
     text: { text: markup, fontfile: FONT_FILE, font: `Lora ${size}`, width, align, justify, spacing, rgba: true, dpi: 72, wrap: "word" },
   })
@@ -475,6 +475,8 @@ async function main() {
     for (const entry of root) {
       if (!entry.id && entry.name !== `v${VERSION}`) await removeFolder(storage, `${book.id}/${entry.name}`);
     }
+    // Demo books have no original PDF: drop sources left by test uploads
+    await removeFolder(supabase.storage.from("ebook-sources"), book.id);
 
     console.log(`✔ ${book.title}: ${pages.length} pages uploaded to ${BUCKET}/${folder} (${((Date.now() - started) / 1000).toFixed(1)}s)`);
   }

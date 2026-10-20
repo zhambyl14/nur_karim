@@ -1,7 +1,8 @@
 import { AlertCircle } from "lucide-react";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
-import { formatPrice } from "@/lib/format";
+import { formatDateTime, formatPrice } from "@/lib/format";
+import { intlLocale } from "@/lib/i18n/config";
 import { cityLabel } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { AdminCard } from "@/components/admin/page-header";
@@ -46,6 +47,15 @@ export async function DashboardView({ range, counters }: { range: DashboardRange
   }
 
   const data = raw as unknown as DashboardData;
+  const dayShort = new Intl.DateTimeFormat(intlLocale(locale), { day: "numeric", month: "short", timeZone: "UTC" });
+  const dayLong = new Intl.DateTimeFormat(intlLocale(locale), { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" });
+  const monthLong = new Intl.DateTimeFormat(intlLocale(locale), { month: "long", year: "numeric", timeZone: "UTC" });
+  const dayPoints = data.by_day.map((d) => {
+    const date = new Date(`${d.date}T00:00:00Z`);
+    return { ...d, short: dayShort.format(date), long: dayLong.format(date) };
+  });
+  const monthPoints = data.by_month.map((m) => ({ ...m, long: monthLong.format(new Date(`${m.month}-01T00:00:00Z`)) }));
+  const recentOrders = data.recent_orders.map((o) => ({ ...o, created_label: formatDateTime(o.created_at, locale) }));
   const hasDaySales = data.by_day.some((d) => d.revenue > 0 || d.orders > 0);
   const hasMonthSales = data.by_month.some((d) => d.revenue > 0);
 
@@ -90,13 +100,13 @@ export async function DashboardView({ range, counters }: { range: DashboardRange
           action={<span className="hidden text-xs font-semibold text-muted sm:inline">{t("admin.dashboard.charts.salesByDayHint")}</span>}
           bodyClassName="pt-3"
         >
-          {hasDaySales ? <SalesByDayChart data={data.by_day} /> : <NoData className="h-[260px]" />}
+          {hasDaySales ? <SalesByDayChart data={dayPoints} /> : <NoData className="h-[260px]" />}
         </AdminCard>
         <AttentionCard counters={counters} className="min-w-0" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <RecentOrdersCard orders={data.recent_orders} className="min-w-0 lg:col-span-2" />
+        <RecentOrdersCard orders={recentOrders} className="min-w-0 lg:col-span-2" />
         <LowStockCard items={data.low_stock} className="min-w-0" />
       </div>
 
@@ -107,7 +117,7 @@ export async function DashboardView({ range, counters }: { range: DashboardRange
           action={<span className="hidden text-xs font-semibold text-muted sm:inline">{t("admin.dashboard.charts.byMonthHint")}</span>}
           bodyClassName="pt-3"
         >
-          {hasMonthSales ? <MonthlyChart data={data.by_month} /> : <NoData className="h-[220px]" />}
+          {hasMonthSales ? <MonthlyChart data={monthPoints} /> : <NoData className="h-[220px]" />}
         </AdminCard>
         <FormatCard data={data} className="min-w-0" />
       </div>

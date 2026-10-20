@@ -149,8 +149,10 @@ export default async function AdminBooksPage({ searchParams }: { searchParams: S
         description={t("admin.books.subtitle")}
         actions={
           <>
+            {/* a CSV file from a route handler: plain download link, not client navigation */}
             <a
               href="/admin/books/export"
+              download
               className={buttonVariants({ variant: "outline", className: "hidden sm:inline-flex" })}
               title={t("admin.books.exportHint")}
             >

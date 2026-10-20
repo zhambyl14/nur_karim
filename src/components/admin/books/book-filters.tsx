@@ -62,7 +62,7 @@ export function BookFilters({ filters, genres }: { filters: BookFilterState; gen
     activeCount > 0 || filters.q || filters.low || filters.sale || filters.demo || filters.nopages;
 
   const selects = (layout: "inline" | "sheet") => {
-    const wrap = layout === "inline" ? "w-44 shrink-0" : "";
+    const wrap = layout === "inline" ? "w-40 shrink-0 2xl:w-44" : "";
     const label = (text: string) => (layout === "sheet" ? text : undefined);
     return (
       <>

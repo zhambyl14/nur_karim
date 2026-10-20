@@ -215,7 +215,7 @@ const orders: Dictionary["admin"]["orders"] = {
     price: "Цена",
     sum: "Сумма",
     total: "Итого",
-    giftNote: "Подарок · цены не указываются",
+    giftNote: "Цены не указываются, чек не вкладывать",
     giftFor: "Подарок для: {name}",
     giftWrap: "Упаковать в подарочную упаковку",
     note: "Примечание",

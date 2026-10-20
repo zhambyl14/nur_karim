@@ -1,7 +1,8 @@
 import "server-only";
 import fs from "node:fs";
 import path from "node:path";
-import sharp from "sharp";
+import { cache } from "react";
+import sharp, { type OverlayOptions } from "sharp";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getProfile } from "@/lib/auth";
 import { maskPhone } from "@/lib/phone";
@@ -111,8 +112,8 @@ export async function loadReaderAccess(bookId: string, profile: Profile | null) 
   };
 }
 
-/** Everything the /read/[bookId] page needs. */
-export async function getReaderPageData(bookId: string) {
+/** Everything the /read/[bookId] page needs (deduped per request: metadata + page). */
+export const getReaderPageData = cache(async function getReaderPageData(bookId: string) {
   const profile = await getProfile();
   const access = await loadReaderAccess(bookId, profile);
   if (!access) return null;
@@ -142,7 +143,7 @@ export async function getReaderPageData(bookId: string) {
     maxDevices: settings.ebook_max_devices,
     ebookPrice: price?.ebook_final_price ?? price?.ebook_price ?? null,
   };
-}
+});
 
 export type ReaderSettings = {
   ebook_max_devices: number;
@@ -383,7 +384,7 @@ export async function renderPage(
     tile = await sharp(tile).resize({ width, height, fit: "inside" }).png().toBuffer();
   }
   const margin = Math.round(width / 40);
-  const layers: sharp.OverlayOptions[] = [{ input: tile, tile: true, gravity: "northwest" }];
+  const layers: OverlayOptions[] = [{ input: tile, tile: true, gravity: "northwest" }];
   if (labelWidth + margin * 2 <= width && labelHeight + margin * 2 <= height) {
     layers.push({ input: label, left: width - labelWidth - margin, top: height - labelHeight - margin });
   }

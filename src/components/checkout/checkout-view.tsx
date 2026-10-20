@@ -140,7 +140,10 @@ function CheckoutForm({
 
   const lineIssues = quote?.errors ?? [];
   const priceChanged = serverError?.code === "PRICE_CHANGED";
-  const canSubmit = !!quote && !loading && !pending && quote.lines.length > 0 && lineIssues.length === 0;
+  // an applied but rejected promo code would make create_order fail: ask to remove it first
+  const promoBad = !!promoCode && quote?.promo?.valid === false;
+  const canSubmit =
+    !!quote && !loading && !pending && quote.lines.length > 0 && lineIssues.length === 0 && !promoBad;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -406,6 +409,7 @@ function CheckoutForm({
           pending={pending}
           priceChanged={priceChanged}
           lineIssues={lineIssues.length > 0}
+          promoBad={promoBad}
         />
       </div>
     </form>
@@ -462,6 +466,7 @@ function DeliveryPrice({ quote, method }: { quote: Quote | null; method: ShipMet
 function ServerErrorBanner({ code, quote }: { code: string; quote: Quote | null }) {
   const { t, te } = useI18n();
   const stock = code === "OUT_OF_STOCK" || code === "BOOK_NOT_FOUND" || code === "FORMAT_UNAVAILABLE" || code === "ALREADY_OWNED";
+  const shortage = code === "OUT_OF_STOCK";
   const price = code === "PRICE_CHANGED";
   return (
     <div
@@ -477,7 +482,7 @@ function ServerErrorBanner({ code, quote }: { code: string; quote: Quote | null 
         <p className={cn("mt-0.5 text-[13px] leading-relaxed", price ? "text-warning/90" : "text-danger/90")}>
           {price && quote
             ? t("checkout.errors.priceChanged", { total: formatPrice(quote.total) })
-            : stock
+            : shortage
               ? `${te(code)} ${t("checkout.errors.outOfStock")}`
               : te(code)}
         </p>
@@ -512,6 +517,7 @@ function OrderSummary({
   pending,
   priceChanged,
   lineIssues,
+  promoBad,
 }: {
   quote: Quote | null;
   loading: boolean;
@@ -524,6 +530,7 @@ function OrderSummary({
   pending: boolean;
   priceChanged: boolean;
   lineIssues: boolean;
+  promoBad: boolean;
 }) {
   const { t } = useI18n();
   const copies = quote?.lines.reduce((n, l) => n + l.quantity, 0) ?? 0;
@@ -623,6 +630,9 @@ function OrderSummary({
               {t("checkout.errors.fixCart")}
             </Link>
           </p>
+        )}
+        {promoBad && !lineIssues && (
+          <p className="mt-2 text-xs font-semibold text-gold">{t("checkout.errors.promoInvalid")}</p>
         )}
         <Button
           type="submit"

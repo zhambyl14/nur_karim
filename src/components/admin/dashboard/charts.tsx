@@ -19,7 +19,6 @@ import {
 } from "recharts";
 import { useI18n } from "@/lib/i18n/client";
 import { formatCompact, formatNumber, formatPrice } from "@/lib/format";
-import { intlLocale } from "@/lib/i18n/config";
 
 /** Chart colors are CSS variables so light / dark themes just work. */
 export const CHART_COLORS = {
@@ -67,27 +66,13 @@ function datum<T>(props: Pick<TooltipContentProps, "active" | "payload">): T | n
   return (props.payload[0]?.payload as T) ?? null;
 }
 
-function useDayLabel() {
-  const { locale } = useI18n();
-  const short = new Intl.DateTimeFormat(intlLocale(locale), { day: "numeric", month: "short", timeZone: "UTC" });
-  const long = new Intl.DateTimeFormat(intlLocale(locale), {
-    weekday: "short",
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-  });
-  return {
-    short: (key: string) => short.format(new Date(`${key}T00:00:00Z`)),
-    long: (key: string) => long.format(new Date(`${key}T00:00:00Z`)),
-  };
-}
-
-type DayPoint = { date: string; revenue: number; orders: number };
+/** `short` / `long` labels are formatted on the server (browsers lack kk month names, which breaks hydration). */
+type DayPoint = { date: string; revenue: number; orders: number; short: string; long: string };
 
 /** Revenue (navy bars, the latest day bordeaux) + orders (gold line) per day */
 export function SalesByDayChart({ data }: { data: DayPoint[] }) {
   const { t } = useI18n();
-  const label = useDayLabel();
+  const shortByDate = new Map(data.map((d) => [d.date, d.short]));
   const last = data.length - 1;
   const thin = data.length > 45;
   return (
@@ -97,7 +82,7 @@ export function SalesByDayChart({ data }: { data: DayPoint[] }) {
           <CartesianGrid vertical={false} stroke={CHART_COLORS.grid} strokeDasharray="3 4" />
           <XAxis
             dataKey="date"
-            tickFormatter={label.short}
+            tickFormatter={(key: string) => shortByDate.get(key) ?? key}
             tick={AXIS_TICK}
             axisLine={false}
             tickLine={false}
@@ -119,7 +104,7 @@ export function SalesByDayChart({ data }: { data: DayPoint[] }) {
               if (!d) return null;
               return (
                 <TooltipBox
-                  title={label.long(d.date)}
+                  title={d.long}
                   rows={[
                     { label: t("admin.dashboard.charts.revenue"), value: formatPrice(d.revenue), color: CHART_COLORS.primary },
                     { label: t("admin.dashboard.charts.orders"), value: formatNumber(d.orders), color: CHART_COLORS.gold },
@@ -151,16 +136,12 @@ export function SalesByDayChart({ data }: { data: DayPoint[] }) {
   );
 }
 
-type MonthPoint = { month: string; revenue: number; orders: number };
+type MonthPoint = { month: string; revenue: number; orders: number; long: string };
 
 export function MonthlyChart({ data }: { data: MonthPoint[] }) {
-  const { t, dict, locale } = useI18n();
+  const { t, dict } = useI18n();
   const months = dict.admin.dashboard.months as Record<string, string>;
   const monthLabel = (key: string) => months[`m${Number(key.slice(5, 7))}`] ?? key;
-  const longLabel = (key: string) =>
-    new Intl.DateTimeFormat(intlLocale(locale), { month: "long", year: "numeric", timeZone: "UTC" }).format(
-      new Date(`${key}-01T00:00:00Z`),
-    );
   const last = data.length - 1;
   return (
     <div className="h-[220px] w-full">
@@ -176,7 +157,7 @@ export function MonthlyChart({ data }: { data: MonthPoint[] }) {
               if (!d) return null;
               return (
                 <TooltipBox
-                  title={longLabel(d.month)}
+                  title={d.long}
                   rows={[
                     { label: t("admin.dashboard.charts.revenue"), value: formatPrice(d.revenue), color: CHART_COLORS.primary },
                     { label: t("admin.dashboard.charts.orders"), value: formatNumber(d.orders) },

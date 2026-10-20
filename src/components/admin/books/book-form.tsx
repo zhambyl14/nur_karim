@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/client";
 import { interpolate } from "@/lib/i18n/translate";
 import { BOOK_LANGUAGES, BOOK_LANGUAGE_LABELS, type BookLanguage } from "@/lib/constants";
-import { formatDate, formatNumber } from "@/lib/format";
+import { formatNumber } from "@/lib/format";
 import { cn, slugify } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Switch, Textarea } from "@/components/ui/field";
@@ -71,6 +71,9 @@ export type BookMeta = {
   rating_count: number;
   created_at: string;
   updated_at: string;
+  /** Dates formatted on the server (browser Intl data for kk differs and breaks hydration) */
+  created_label: string;
+  updated_label: string;
   ebook_page_count: number;
   ebook_version: number;
   ordered_units: number;
@@ -836,11 +839,11 @@ export function BookForm({
               <dl className="space-y-1 text-xs text-muted">
                 <div className="flex justify-between gap-3">
                   <dt>{t("admin.books.form.statCreated")}</dt>
-                  <dd className="font-semibold text-ink-2">{formatDate(meta.created_at, locale)}</dd>
+                  <dd className="font-semibold text-ink-2">{meta.created_label}</dd>
                 </div>
                 <div className="flex justify-between gap-3">
                   <dt>{t("admin.books.form.statUpdated")}</dt>
-                  <dd className="font-semibold text-ink-2">{formatDate(meta.updated_at, locale)}</dd>
+                  <dd className="font-semibold text-ink-2">{meta.updated_label}</dd>
                 </div>
               </dl>
               <Button variant="outline" size="sm" className="w-full" onClick={duplicate} disabled={pending} leftIcon={<Copy className="size-4" />}>
@@ -871,7 +874,7 @@ export function BookForm({
         }
       >
         {dirty && mode === "edit" && (
-          <Button variant="ghost" size="sm" onClick={() => void discard()} disabled={pending} leftIcon={<X className="size-4" />}>
+          <Button variant="ghost" size="sm" onClick={() => void discard()} disabled={pending} leftIcon={<X className="size-4" />} aria-label={t("admin.books.form.discard")}>
             <span className="hidden sm:inline">{t("admin.books.form.discard")}</span>
           </Button>
         )}

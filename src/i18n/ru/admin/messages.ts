@@ -47,6 +47,7 @@ const messages: Dictionary["admin"]["messages"] = {
   back: "Все сообщения",
   replyPlaceholder: "Напишите ответ клиенту…",
   replyHint: "Ответ будет доставлен клиенту на сайте и в Telegram.",
+  replyHintNoTelegram: "Клиент не подключил Telegram: ответ он увидит в разделе «Сообщения» на сайте.",
 };
 
 export default messages;

@@ -45,6 +45,7 @@ const messages = {
   back: "Барлық хабарламалар",
   replyPlaceholder: "Клиентке жауап жазыңыз…",
   replyHint: "Жауап клиентке сайтта және Telegram арқылы жеткізіледі.",
+  replyHintNoTelegram: "Клиент Telegram-ды байланыстырмаған: жауапты сайттағы «Хабарламалар» бөлімінен көреді.",
 };
 
 export default messages;

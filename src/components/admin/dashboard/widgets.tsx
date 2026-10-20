@@ -270,7 +270,7 @@ export async function AttentionCard({ counters, className }: { counters: AdminCo
     {
       key: "lowStock",
       count: counters.low_stock,
-      href: "/admin/books?stock=low",
+      href: "/admin/books?low=1&sort=stock",
       icon: <BookOpen className="size-4" />,
       tone: "bg-danger-soft text-danger",
     },
@@ -328,7 +328,7 @@ export async function LowStockCard({ items, className }: { items: DashboardData[
       title={t("admin.dashboard.lowStock.title")}
       action={
         items.length > 0 ? (
-          <Link href="/admin/books?stock=low" className="text-xs font-bold text-wine-ink hover:underline">
+          <Link href="/admin/books?low=1&sort=stock" className="text-xs font-bold text-wine-ink hover:underline">
             {t("admin.dashboard.lowStock.all")} →
           </Link>
         ) : undefined

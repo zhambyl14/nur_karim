@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { BookOpen, Gift, Heart, LayoutDashboard, MessageCircle, Package, Settings } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { formatPhone } from "@/lib/phone";
-import { Avatar } from "@/components/ui/misc";
+import { Avatar, Skeleton } from "@/components/ui/misc";
 import { buttonVariants } from "@/components/ui/button";
 import { WelcomeBanner } from "@/components/account/welcome-banner";
 import { TelegramStatusCard } from "@/components/account/telegram-status-card";
@@ -16,7 +17,7 @@ import {
   StatTile,
   type LatestOrder,
 } from "@/components/account/overview-cards";
-import type { OrderStatus, UserCounters } from "@/types/app";
+import type { OrderStatus, Profile, UserCounters } from "@/types/app";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
@@ -47,60 +48,11 @@ export default async function AccountOverviewPage({
   const profile = await requireUser("/account");
   const { t } = await getI18n();
   const { welcome } = await searchParams;
-  const supabase = await createSupabaseServer();
-
-  const [countersRes, ebooksRes, readingRes, orderRes] = await Promise.all([
-    supabase.rpc("my_counters"),
-    supabase.from("entitlements").select("book_id", { count: "exact", head: true }).eq("user_id", profile.id),
-    supabase
-      .from("reading_progress")
-      .select("book_id, page, page_count, books(title, author, cover_url, cover_palette)")
-      .eq("user_id", profile.id)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from("orders")
-      .select("order_number, status, total, created_at, has_paper, order_items(quantity)")
-      .eq("user_id", profile.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ]);
-
-  const counters: UserCounters = {
-    unread_messages: 0,
-    gifts_waiting: 0,
-    orders_active: 0,
-    ...((countersRes.data as Partial<UserCounters> | null) ?? {}),
-  };
-  const ebooks = ebooksRes.count ?? 0;
-  const reading = readingRes.data as ReadingRow | null;
-  const orderRow = orderRes.data as OrderRow | null;
-  const latestOrder: LatestOrder | null = orderRow
-    ? {
-        order_number: orderRow.order_number,
-        status: orderRow.status,
-        total: orderRow.total,
-        created_at: orderRow.created_at,
-        has_paper: orderRow.has_paper,
-        items: orderRow.order_items.reduce((sum, item) => sum + item.quantity, 0),
-      }
-    : null;
 
   const firstName = profile.full_name.trim().split(/\s+/)[0] ?? "";
   const memberYear = new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "Asia/Almaty" }).format(
     new Date(profile.created_at),
   );
-
-  const shortcuts = [
-    { href: "/account/orders", icon: Package, title: t("nav.orders"), description: t("account.shortcuts.orders"), count: counters.orders_active },
-    { href: "/account/library", icon: BookOpen, title: t("nav.myBooks"), description: t("account.shortcuts.library") },
-    { href: "/account/messages", icon: MessageCircle, title: t("nav.messages"), description: t("account.shortcuts.messages"), count: counters.unread_messages },
-    { href: "/account/gifts", icon: Gift, title: t("nav.myGifts"), description: t("account.shortcuts.gifts"), count: counters.gifts_waiting },
-    { href: "/account/favorites", icon: Heart, title: t("nav.favorites"), description: t("account.shortcuts.favorites") },
-    { href: "/account/settings", icon: Settings, title: t("nav.settings"), description: t("account.shortcuts.settings") },
-  ];
 
   return (
     <div className="grid gap-5 sm:gap-6">
@@ -124,6 +76,95 @@ export default async function AccountOverviewPage({
           </Link>
         )}
       </header>
+
+      {/* The header shows at once; counters, reading progress and the latest order stream in. */}
+      <Suspense fallback={<OverviewSkeleton label={t("account.overview.loading")} />}>
+        <OverviewContent profile={profile} />
+      </Suspense>
+    </div>
+  );
+}
+
+function OverviewSkeleton({ label }: { label: string }) {
+  return (
+    <div className="grid gap-5 sm:gap-6" role="status" aria-label={label}>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {[0, 1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-[118px] rounded-[18px] sm:h-[134px]" />
+        ))}
+      </div>
+      <Skeleton className="h-[150px] rounded-[18px]" />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <Skeleton key={i} className="h-[82px] rounded-[18px]" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+async function OverviewContent({ profile }: { profile: Profile }) {
+  const { t } = await getI18n();
+  const supabase = await createSupabaseServer();
+
+  const [countersRes, ebooksRes, readingRes, orderRes] = await Promise.all([
+    supabase.rpc("my_counters"),
+    supabase.from("entitlements").select("book_id", { count: "exact", head: true }).eq("user_id", profile.id),
+    supabase
+      .from("reading_progress")
+      .select("book_id, page, page_count, books(title, author, cover_url, cover_palette)")
+      .eq("user_id", profile.id)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("orders")
+      .select("order_number, status, total, created_at, has_paper, order_items(quantity)")
+      .eq("user_id", profile.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const failed = [countersRes.error, ebooksRes.error, readingRes.error, orderRes.error].filter(Boolean);
+  if (failed.length) console.error("account overview: query failed", failed.map((e) => e?.message));
+
+  const counters: UserCounters = {
+    unread_messages: 0,
+    gifts_waiting: 0,
+    orders_active: 0,
+    ...((countersRes.data as Partial<UserCounters> | null) ?? {}),
+  };
+  const ebooks = ebooksRes.count ?? 0;
+  const reading = readingRes.data as ReadingRow | null;
+  const orderRow = orderRes.data as OrderRow | null;
+  const latestOrder: LatestOrder | null = orderRow
+    ? {
+        order_number: orderRow.order_number,
+        status: orderRow.status,
+        total: orderRow.total,
+        created_at: orderRow.created_at,
+        has_paper: orderRow.has_paper,
+        items: orderRow.order_items.reduce((sum, item) => sum + item.quantity, 0),
+      }
+    : null;
+
+  const shortcuts = [
+    { href: "/account/orders", icon: Package, title: t("nav.orders"), description: t("account.shortcuts.orders"), count: counters.orders_active },
+    { href: "/account/library", icon: BookOpen, title: t("nav.myBooks"), description: t("account.shortcuts.library") },
+    { href: "/account/messages", icon: MessageCircle, title: t("nav.messages"), description: t("account.shortcuts.messages"), count: counters.unread_messages },
+    { href: "/account/gifts", icon: Gift, title: t("nav.myGifts"), description: t("account.shortcuts.gifts"), count: counters.gifts_waiting },
+    { href: "/account/favorites", icon: Heart, title: t("nav.favorites"), description: t("account.shortcuts.favorites") },
+    { href: "/account/settings", icon: Settings, title: t("nav.settings"), description: t("account.shortcuts.settings") },
+  ];
+
+  return (
+    <>
+      {failed.length > 0 && (
+        <p role="alert" className="rounded-[13px] border border-warning/25 bg-warning-soft px-3.5 py-3 text-[13px] font-semibold text-warning">
+          {t("account.overview.loadError")}
+        </p>
+      )}
 
       <section aria-labelledby="stats-title">
         <h2 id="stats-title" className="sr-only">
@@ -164,6 +205,6 @@ export default async function AccountOverviewPage({
       </section>
 
       <TelegramStatusCard telegramId={profile.telegram_id} telegramUsername={profile.telegram_username} />
-    </div>
+    </>
   );
 }

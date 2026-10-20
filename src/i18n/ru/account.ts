@@ -15,6 +15,8 @@ const account: Dictionary["account"] = {
     welcomeText: "Аккаунт готов. Теперь вы можете заказывать книги, читать электронные книги и дарить книги друзьям.",
     welcomeCta: "Перейти в каталог",
     welcomeClose: "Закрыть",
+    loading: "Загружаем данные кабинета",
+    loadError: "Не удалось загрузить часть данных. Попробуйте обновить страницу.",
   },
   stats: {
     title: "Кратко",
@@ -64,6 +66,7 @@ const account: Dictionary["account"] = {
   settings: {
     title: "Настройки",
     subtitle: "Личные данные, язык, оформление и безопасность",
+    loading: "Загружаем настройки",
     profile: {
       title: "Личные данные",
       fullName: "Имя и фамилия",

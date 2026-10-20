@@ -34,6 +34,10 @@ export function PromoField({
   const inputId = useId();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const apply = () => {
+    const value = draft.trim();
+    if (value) onApply(value);
+  };
 
   if (code) {
     const result = promo && promo.code === code.toUpperCase() ? promo : null;
@@ -110,13 +114,12 @@ export function PromoField({
   }
 
   return (
-    <form
+    // not a <form>: the field is also rendered inside the checkout form, and a
+    // nested form would submit (and bubble to) the order form on Enter
+    <div
+      role="group"
+      aria-label={t("cart.promo.label")}
       className={cn("rounded-[14px] border border-dashed border-line-strong bg-card p-2", className)}
-      onSubmit={(e) => {
-        e.preventDefault();
-        const value = draft.trim();
-        if (value) onApply(value);
-      }}
     >
       <label htmlFor={inputId} className="sr-only">
         {t("cart.promo.inputLabel")}
@@ -133,11 +136,16 @@ export function PromoField({
           spellCheck={false}
           maxLength={40}
           className="h-11 flex-1 uppercase tracking-wide"
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            apply();
+          }}
         />
-        <Button type="submit" variant="ink" className="h-11" disabled={!draft.trim()}>
+        <Button type="button" variant="ink" className="h-11" disabled={!draft.trim()} onClick={apply}>
           {t("cart.promo.apply")}
         </Button>
       </div>
-    </form>
+    </div>
   );
 }

@@ -222,6 +222,11 @@ export async function resetPasswordAction(_prev: AuthFormState, formData: FormDa
   const { error: signInError } = email
     ? await supabase.auth.signInWithPassword({ email, password })
     : { error: true };
+  if (!signInError) {
+    // Whoever knew the old password must not stay signed in on other devices.
+    const { error: revokeError } = await supabase.auth.signOut({ scope: "others" });
+    if (revokeError) console.warn("reset: could not revoke other sessions", revokeError.code, revokeError.message);
+  }
 
   const locale: Locale = profile.locale === "ru" ? "ru" : "kk";
   const chatIds = [...new Set([row.telegramId, profile.telegram_id].filter((id): id is number => typeof id === "number"))];

@@ -86,6 +86,10 @@ export async function changePasswordAction(input: {
     return { ok: false, error: "generic" };
   }
 
+  // A changed password must end the sessions on other devices (this one stays signed in).
+  const { error: revokeError } = await supabase.auth.signOut({ scope: "others" });
+  if (revokeError) console.warn("settings: could not revoke other sessions", revokeError.code, revokeError.message);
+
   const userId = profile.id;
   after(() =>
     notifyUser(userId, (locale) => {

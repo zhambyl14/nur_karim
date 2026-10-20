@@ -63,4 +63,6 @@ export type RecentOrder = {
   has_ebook: boolean;
   is_gift: boolean;
   delivery_city: string | null;
+  /** formatted on the server (see SalesByDayChart) */
+  created_label?: string;
 };

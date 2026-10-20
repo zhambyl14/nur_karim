@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Gift, Package } from "lucide-react";
 import { useI18n } from "@/lib/i18n/client";
-import { formatDateTime, formatPrice } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import { cityLabel } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { AdminCard } from "@/components/admin/page-header";
@@ -76,7 +76,7 @@ export function RecentOrdersCard({ orders, className }: { orders: RecentOrder[];
                       <Avatar name={o.contact_name} size={30} tone="soft" />
                       <span className="min-w-0">
                         <span className="block truncate text-ink">{o.contact_name}</span>
-                        <span className="block truncate text-[11.5px] font-medium text-faint">{formatDateTime(o.created_at, locale)}</span>
+                        <span className="block truncate text-[11.5px] font-medium text-faint">{o.created_label}</span>
                       </span>
                     </span>
                     <span className="flex min-w-0 items-center gap-1.5 font-medium text-muted">
@@ -103,7 +103,7 @@ export function RecentOrdersCard({ orders, className }: { orders: RecentOrder[];
                       <div className="min-w-0">
                         <div className="truncate text-sm font-bold text-ink">{o.contact_name}</div>
                         <div className="text-xs font-medium text-faint">
-                          #{o.order_number} · {formatDateTime(o.created_at, locale)}
+                          #{o.order_number} · {o.created_label}
                         </div>
                       </div>
                     </div>

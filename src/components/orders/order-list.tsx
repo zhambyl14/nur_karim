@@ -48,7 +48,7 @@ function statusLabel(o: OrderListRow, t: TFunction) {
 export function OrderList({ orders, t, locale }: { orders: OrderListRow[]; t: TFunction; locale: Locale }) {
   return (
     <div className="overflow-hidden md:rounded-[20px] md:border md:border-line md:bg-card">
-      <div className="hidden grid-cols-[120px_minmax(0,1fr)_110px_150px_110px_24px] gap-4 border-b border-line bg-subtle px-5 py-3 text-[11px] font-bold uppercase tracking-[0.1em] text-muted md:grid">
+      <div className="hidden grid-cols-[150px_minmax(0,1fr)_120px_150px_100px_24px] gap-4 border-b border-line bg-subtle px-5 py-3 text-[11px] font-bold uppercase tracking-[0.1em] text-muted md:grid">
         <span>{t("orders.list.number")}</span>
         <span>{t("orders.list.books")}</span>
         <span>{t("orders.list.date")}</span>
@@ -65,11 +65,11 @@ export function OrderList({ orders, t, locale }: { orders: OrderListRow[]; t: TF
               <Link
                 href={`/orders/${o.order_number}`}
                 aria-label={t("orders.list.openAria", { number: orderNo(o.order_number) })}
-                className="block rounded-2xl border border-line bg-card px-4 py-3.5 transition hover:border-line-strong md:grid md:grid-cols-[120px_minmax(0,1fr)_110px_150px_110px_24px] md:items-center md:gap-4 md:rounded-none md:border-0 md:px-5 md:py-4 md:hover:bg-subtle/60"
+                className="block rounded-2xl border border-line bg-card px-4 py-3.5 transition hover:border-line-strong md:grid md:grid-cols-[150px_minmax(0,1fr)_120px_150px_100px_24px] md:items-center md:gap-4 md:rounded-none md:border-0 md:px-5 md:py-4 md:hover:bg-subtle/60"
               >
                 {/* number (+ status on phones) */}
                 <div className="flex items-center justify-between gap-3 md:block">
-                  <span className="flex items-center gap-1.5 text-[13px] font-bold text-ink">
+                  <span className="flex items-center gap-1.5 whitespace-nowrap text-[13px] font-bold text-ink">
                     {t("orders.orderTitle", { number: orderNo(o.order_number) })}
                     {o.is_gift && <Gift className="size-3.5 text-wine-ink" aria-label={t("orders.list.gift")} />}
                   </span>
