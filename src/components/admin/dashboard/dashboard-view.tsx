@@ -1,8 +1,7 @@
 import { AlertCircle } from "lucide-react";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
-import { formatDateTime, formatPrice } from "@/lib/format";
-import { intlLocale } from "@/lib/i18n/config";
+import { formatDateTime, formatDateWith, formatPrice } from "@/lib/format";
 import { cityLabel } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { AdminCard } from "@/components/admin/page-header";
@@ -47,9 +46,11 @@ export async function DashboardView({ range, counters }: { range: DashboardRange
   }
 
   const data = raw as unknown as DashboardData;
-  const dayShort = new Intl.DateTimeFormat(intlLocale(locale), { day: "numeric", month: "short", timeZone: "UTC" });
-  const dayLong = new Intl.DateTimeFormat(intlLocale(locale), { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" });
-  const monthLong = new Intl.DateTimeFormat(intlLocale(locale), { month: "long", year: "numeric", timeZone: "UTC" });
+  const dayShort = { format: (d: Date) => formatDateWith(d, locale, { day: "numeric", month: "short", timeZone: "UTC" }) };
+  const dayLong = {
+    format: (d: Date) => formatDateWith(d, locale, { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" }),
+  };
+  const monthLong = { format: (d: Date) => formatDateWith(d, locale, { month: "long", year: "numeric", timeZone: "UTC" }) };
   const dayPoints = data.by_day.map((d) => {
     const date = new Date(`${d.date}T00:00:00Z`);
     return { ...d, short: dayShort.format(date), long: dayLong.format(date) };

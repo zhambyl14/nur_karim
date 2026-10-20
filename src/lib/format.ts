@@ -33,41 +33,116 @@ function toDate(value: DateInput): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+// Browsers ship little or no Kazakh locale data (Chrome prints "2026 M10 20"),
+// so Kazakh dates are assembled from fixed tables. This keeps server and client
+// output identical and avoids hydration mismatches.
+const KK_MONTHS = [
+  "қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым",
+  "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан",
+];
+const KK_MONTHS_SHORT = [
+  "қаң.", "ақп.", "нау.", "сәу.", "мам.", "мау.",
+  "шіл.", "там.", "қыр.", "қаз.", "қар.", "жел.",
+];
+const KK_WEEKDAYS = ["жексенбі", "дүйсенбі", "сейсенбі", "сәрсенбі", "бейсенбі", "жұма", "сенбі"];
+const KK_WEEKDAYS_SHORT = ["жс", "дс", "сс", "ср", "бс", "жм", "сб"];
+
+function zonedParts(d: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(d);
+  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+  const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday"));
+  return {
+    year: Number(get("year")),
+    month: Number(get("month")) - 1,
+    day: Number(get("day")),
+    weekday: Math.max(0, weekday),
+    hour: get("hour").padStart(2, "0"),
+    minute: get("minute").padStart(2, "0"),
+  };
+}
+
+/**
+ * Locale-aware date formatting that renders the same on server and client.
+ * Russian uses Intl (well supported everywhere); Kazakh uses fixed tables.
+ */
+export function formatDateWith(d: Date, locale: Locale, opts: Intl.DateTimeFormatOptions): string {
+  if (locale !== "kk") return new Intl.DateTimeFormat(intlLocale(locale), opts).format(d);
+  const p = zonedParts(d, opts.timeZone ?? STORE_TIMEZONE);
+  const out: string[] = [];
+  let datePart = "";
+  if (opts.month) {
+    const monthName =
+      opts.month === "short" || opts.month === "narrow"
+        ? KK_MONTHS_SHORT[p.month]
+        : opts.month === "long"
+          ? KK_MONTHS[p.month]
+          : String(p.month + 1).padStart(2, "0");
+    if (opts.month === "numeric" || opts.month === "2-digit") {
+      datePart = [opts.day ? String(p.day).padStart(2, "0") : "", monthName, opts.year ? String(p.year) : ""]
+        .filter(Boolean)
+        .join(".");
+    } else {
+      datePart = [opts.day ? String(p.day) : "", monthName, opts.year ? String(p.year) : ""].filter(Boolean).join(" ");
+    }
+  } else if (opts.day) {
+    datePart = String(p.day);
+  } else if (opts.year) {
+    datePart = String(p.year);
+  }
+  if (opts.weekday) {
+    const wd = opts.weekday === "long" ? KK_WEEKDAYS[p.weekday] : KK_WEEKDAYS_SHORT[p.weekday];
+    out.push(datePart ? `${wd}, ${datePart}` : wd);
+  } else if (datePart) {
+    out.push(datePart);
+  }
+  if (opts.hour) out.push(opts.minute ? `${p.hour}:${p.minute}` : p.hour);
+  return out.join(", ");
+}
+
 /** "20 қазан 2026" */
 export function formatDate(value: DateInput, locale: Locale, opts?: Intl.DateTimeFormatOptions): string {
   const d = toDate(value);
   if (!d) return "";
-  return new Intl.DateTimeFormat(intlLocale(locale), {
+  return formatDateWith(d, locale, {
     day: "numeric",
     month: "long",
     year: "numeric",
     timeZone: STORE_TIMEZONE,
     ...opts,
-  }).format(d);
+  });
 }
 
 /** "20 қазан, 14:05" */
 export function formatDateTime(value: DateInput, locale: Locale): string {
   const d = toDate(value);
   if (!d) return "";
-  return new Intl.DateTimeFormat(intlLocale(locale), {
+  return formatDateWith(d, locale, {
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
     timeZone: STORE_TIMEZONE,
-  }).format(d);
+  });
 }
 
 /** "14:05" */
 export function formatTime(value: DateInput, locale: Locale): string {
   const d = toDate(value);
   if (!d) return "";
-  return new Intl.DateTimeFormat(intlLocale(locale), {
+  return formatDateWith(d, locale, {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: STORE_TIMEZONE,
-  }).format(d);
+  });
 }
 
 /** Calendar date in the store timezone: "2026-10-20" */

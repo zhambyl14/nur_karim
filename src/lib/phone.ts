@@ -66,6 +66,8 @@ export function whatsappHref(input: string | null | undefined, text?: string): s
  */
 export function formatPhoneInput(raw: string): string {
   let d = raw.replace(/\D/g, "");
+  // A full number pasted after the "+7 " prefix: "+7 87001234567" -> drop the prefix 7.
+  if (d.length >= 12 && d.startsWith("7") && (d[1] === "8" || d[1] === "7")) d = d.slice(1);
   if (d.startsWith("8")) d = `7${d.slice(1)}`;
   if (d.length > 0 && !d.startsWith("7")) d = `7${d}`;
   d = d.slice(0, 11);

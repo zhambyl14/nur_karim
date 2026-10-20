@@ -52,10 +52,15 @@ export async function searchBooks(query: CatalogQuery = {}): Promise<{ items: Bo
   if (query.format === "paper") builder = builder.eq("paper_enabled", true);
   if (query.format === "ebook") builder = builder.eq("ebook_available", true);
   if (query.sale) builder = builder.gt("discount_pct", 0);
-  if (query.inStock) builder = builder.or("stock.gt.0,ebook_available.eq.true");
+  if (query.inStock) {
+    if (query.format === "paper") builder = builder.gt("stock", 0);
+    else if (query.format !== "ebook") builder = builder.or("stock.gt.0,ebook_available.eq.true");
+  }
   if (query.featured) builder = builder.eq("is_featured", true);
-  if (typeof query.minPrice === "number") builder = builder.gte("min_price", query.minPrice);
-  if (typeof query.maxPrice === "number") builder = builder.lte("min_price", query.maxPrice);
+  const priceColumn =
+    query.format === "paper" ? "paper_final_price" : query.format === "ebook" ? "ebook_final_price" : "min_price";
+  if (typeof query.minPrice === "number") builder = builder.gte(priceColumn, query.minPrice);
+  if (typeof query.maxPrice === "number") builder = builder.lte(priceColumn, query.maxPrice);
   if (query.excludeId) builder = builder.neq("id", query.excludeId);
 
   switch (query.sort ?? "new") {

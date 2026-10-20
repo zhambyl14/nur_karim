@@ -1,3 +1,4 @@
+import { safeNext } from "@/lib/utils";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
@@ -46,10 +47,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isSignedIn && matches(pathname, GUEST_ONLY)) {
-    const next = request.nextUrl.searchParams.get("next");
-    const url = request.nextUrl.clone();
-    url.pathname = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
-    url.search = "";
+    const url = new URL(safeNext(request.nextUrl.searchParams.get("next")), request.url);
     return copyCookies(response, NextResponse.redirect(url));
   }
 

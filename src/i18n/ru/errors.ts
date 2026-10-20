@@ -33,6 +33,7 @@ const errors: Dictionary["errors"] = {
   NOT_REVEALED: "Подарок ещё не открыт.",
   PHONE_MISMATCH: "Номер телефона не совпадает с номером получателя подарка.",
   ALREADY_CLAIMED: "Подарок уже принят другим аккаунтом.",
+  ALREADY_THANKED: "Благодарность уже отправлена.",
   ALREADY_SUBMITTED: "Адрес уже был отправлен.",
   NOT_ALLOWED: "Это действие недоступно.",
   MESSAGE_INVALID: "Сообщение пустое или слишком длинное.",

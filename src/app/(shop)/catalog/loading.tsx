@@ -2,7 +2,7 @@ import { BookCardSkeleton } from "@/components/book/book-card";
 import { Skeleton } from "@/components/ui/misc";
 
 /** Storefront skeleton shown while a shop page streams in */
-export default function ShopLoading() {
+export default function CatalogLoading() {
   return (
     <div className="nk-container py-6 sm:py-8 lg:py-10" aria-busy="true" aria-live="polite">
       <Skeleton className="h-8 w-48 sm:h-10 sm:w-72" />
