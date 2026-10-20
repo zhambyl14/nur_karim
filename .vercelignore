@@ -1,0 +1,6 @@
+.env*
+.qa
+.next
+node_modules
+screenshots
+*.log
