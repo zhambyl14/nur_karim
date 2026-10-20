@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { LoginForm } from "@/components/auth/login-form";
 import { getI18n } from "@/lib/i18n/server";
+import { safeNext } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
@@ -15,7 +16,7 @@ export default async function LoginPage({
 }) {
   const { t } = await getI18n();
   const { next } = await searchParams;
-  const nextPath = typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : null;
+  const nextPath = typeof next === "string" ? safeNext(next, "") || null : null;
 
   return (
     <AuthScreen title={t("auth.login.title")} subtitle={t("auth.login.subtitle")}>

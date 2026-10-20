@@ -8,6 +8,7 @@ import { TelegramQr } from "@/components/auth/telegram-qr";
 import { StoreContacts } from "@/components/auth/store-contacts";
 import { getSettings } from "@/lib/data/common";
 import { getI18n } from "@/lib/i18n/server";
+import { safeNext } from "@/lib/utils";
 import { env, telegramBotLink } from "@/lib/env";
 import type { StoreSettings } from "@/types/app";
 
@@ -23,7 +24,7 @@ export default async function RegisterPage({
 }) {
   const { t } = await getI18n();
   const { next } = await searchParams;
-  const nextPath = typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : null;
+  const nextPath = typeof next === "string" ? safeNext(next, "") || null : null;
   const loginHref = nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : "/login";
   const botReady = env.telegramBotUsername !== "";
   const botUrl = telegramBotLink("register");

@@ -67,11 +67,12 @@ export async function searchBooks(query: CatalogQuery = {}): Promise<{ items: Bo
     case "popular":
       builder = builder.order("sold_count", { ascending: false }).order("created_at", { ascending: false });
       break;
+    // sort by the price of the filtered format (e.g. paper price when format=paper)
     case "price_asc":
-      builder = builder.order("min_price", { ascending: true, nullsFirst: false });
+      builder = builder.order(priceColumn, { ascending: true, nullsFirst: false });
       break;
     case "price_desc":
-      builder = builder.order("min_price", { ascending: false, nullsFirst: false });
+      builder = builder.order(priceColumn, { ascending: false, nullsFirst: false });
       break;
     case "rating":
       builder = builder.order("rating_avg", { ascending: false }).order("rating_count", { ascending: false });
@@ -83,8 +84,16 @@ export async function searchBooks(query: CatalogQuery = {}): Promise<{ items: Bo
       builder = builder.order("created_at", { ascending: false });
   }
 
+  // stable order across pages when the sort column has ties
+  builder = builder.order("id", { ascending: true });
+
   const from = (page - 1) * pageSize;
   const { data, count, error } = await builder.range(from, from + pageSize - 1);
+  if (error?.code === "PGRST103") {
+    // page past the end (e.g. an old link): no rows, but keep the real total
+    const { count: total } = await builder.range(0, 0);
+    return { items: [], total: total ?? 0 };
+  }
   if (error) {
     console.error("searchBooks failed", error);
     return { items: [], total: 0 };

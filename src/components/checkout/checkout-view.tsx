@@ -64,7 +64,13 @@ function CheckoutForm({
   const [mode, setMode] = useState<Mode>(initialMode);
   const [contact, setContact] = useState({ name: profile.name, phone: profile.phone });
   const [method, setMethod] = useState<ShipMethod | null>(saved.method);
-  const [address, setAddress] = useState<AddressDraft>({ ...EMPTY_ADDRESS, ...saved.draft });
+  // recipient defaults to the account holder until a saved address says otherwise
+  const [address, setAddress] = useState<AddressDraft>(() => ({
+    ...EMPTY_ADDRESS,
+    ...saved.draft,
+    recipientName: saved.draft.recipientName || profile.name,
+    recipientPhone: saved.draft.recipientPhone || profile.phone,
+  }));
   const [giftAddress, setGiftAddress] = useState<AddressDraft>(EMPTY_ADDRESS);
   const [gift, setGift] = useState<GiftDraft>(EMPTY_GIFT);
   const [note, setNote] = useState("");

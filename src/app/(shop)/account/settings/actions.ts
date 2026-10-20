@@ -39,7 +39,11 @@ export async function updateProfileNameAction(fullName: string): Promise<Setting
 const passwordSchema = z
   .object({
     current: z.string().min(1, "PASSWORD_WRONG").max(200, "PASSWORD_WRONG"),
-    password: z.string().min(8, "PASSWORD_WEAK").max(72, "PASSWORD_TOO_LONG"),
+    // Supabase Auth (bcrypt) limits passwords to 72 bytes: Cyrillic letters take 2 bytes each.
+    password: z
+      .string()
+      .min(8, "PASSWORD_WEAK")
+      .refine((v) => Buffer.byteLength(v, "utf8") <= 72, "PASSWORD_TOO_LONG"),
     confirm: z.string().max(200),
   })
   .refine((v) => v.password === v.confirm, { message: "PASSWORD_MISMATCH", path: ["confirm"] })

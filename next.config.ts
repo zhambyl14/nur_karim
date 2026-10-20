@@ -40,6 +40,14 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Telegram Mini App: Telegram Web/Desktop embeds it in an iframe.
+        source: "/tg/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self' https://web.telegram.org https://*.telegram.org" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+      {
         source: "/read/:path*",
         headers: [
           { key: "Cache-Control", value: "no-store" },

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { SearchX } from "lucide-react";
 import { searchBooks } from "@/lib/data/books";
 import { getGenres } from "@/lib/data/common";
@@ -45,6 +46,10 @@ export default async function CatalogPage({ searchParams }: Props) {
     searchBooks({ ...params, page, pageSize: CATALOG_PAGE_SIZE }),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / CATALOG_PAGE_SIZE));
+  // a page past the end (old link, fewer books now): go to the last page
+  if (items.length === 0 && total > 0 && page > totalPages) {
+    redirect(catalogHref(params, { page: totalPages > 1 ? totalPages : undefined }));
+  }
   const popular = items.length === 0 ? (await searchBooks({ sort: "popular", pageSize: 5 })).items : [];
   const stateKey = catalogHref(params);
 

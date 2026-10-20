@@ -76,8 +76,10 @@ export const useCart = create<CartState>()(
       version: 1,
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({ lines: s.lines, ownerId: s.ownerId }),
+      // localStorage hydration runs synchronously while `create()` is still
+      // executing, so `useCart` does not exist yet: defer the flag update.
       onRehydrateStorage: () => () => {
-        useCart.setState({ hydrated: true });
+        queueMicrotask(() => useCart.setState({ hydrated: true }));
       },
     },
   ),

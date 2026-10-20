@@ -33,7 +33,11 @@ const SERVICE_ROLE_KEY = runtime.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 const TOKEN_TTL_MINUTES = 30;
 const MAX_TOKENS_PER_HOUR = 5;
-const CONTACT_BUTTON = "📱 Тіркелу / Регистрация";
+const CONTACT_BUTTON = { kk: "📱 Нөмірді растау", ru: "📱 Подтвердить номер" } as const;
+// The phone is confirmed through a Telegram Mini App (inline button inside the
+// message, WebApp.requestContact). Mini Apps need an https site; until the site
+// is deployed on https the bot falls back to the classic request_contact keyboard.
+const MINI_APP = /^https:\/\//.test(SITE_URL);
 
 const db = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
@@ -59,7 +63,7 @@ type TgMessage = {
   contact?: TgContact;
 };
 type TgUpdate = { update_id: number; message?: TgMessage };
-type InlineButton = { text: string; url: string };
+type InlineButton = { text: string; url?: string; web_app?: { url: string } };
 type ReplyMarkup =
   | { inline_keyboard: InlineButton[][] }
   | {
@@ -80,14 +84,14 @@ const TEXTS = {
   kk: {
     welcome: "Сәлеметсіз бе, <b>{name}</b>!\n\n<b>Nur Karim</b> кітап дүкенінің ботына қош келдіңіз.",
     registerHow:
-      "Тіркелу үшін төмендегі «📱 Тіркелу / Регистрация» батырмасын басып, нөміріңізбен бөлісіңіз. Біз сізге тіркелуді аяқтау сілтемесін жібереміз.",
+      "Тіркелу үшін осы хабарламадағы «📱 Нөмірді растау» батырмасын басып, нөміріңізбен бөлісіңіз. Біз сізге тіркелуді аяқтау сілтемесін жібереміз.",
     resetHow:
-      "Құпиясөзді жаңарту үшін төмендегі «📱 Тіркелу / Регистрация» батырмасын басып, тіркелген нөміріңізбен бөлісіңіз. Біз сізге құпиясөзді жаңарту сілтемесін жібереміз.",
+      "Құпиясөзді жаңарту үшін осы хабарламадағы «📱 Нөмірді растау» батырмасын басып, тіркелген нөміріңізбен бөлісіңіз. Біз сізге құпиясөзді жаңарту сілтемесін жібереміз.",
     alreadyLinked:
       "Сіздің Telegram аккаунтыңыз {phone} нөміріне байланыстырылған.\n\n/orders — соңғы тапсырыстар\n/reset — құпиясөзді жаңарту",
     contactReceived: "✅ Нөміріңіз қабылданды: <b>{phone}</b>",
     notOwnContact:
-      "⚠️ Тек өз нөміріңізбен бөлісіңіз. Төмендегі батырманы басыңыз — Telegram нөміріңізді өзі жібереді.",
+      "⚠️ Тек өз нөміріңізбен бөлісіңіз. «📱 Нөмірді растау» батырмасын басыңыз — Telegram нөміріңізді өзі жібереді.",
     phoneUnsupported: "⚠️ Бұл нөмірмен тіркелу мүмкін емес. +7 басталатын Қазақстан нөмірін пайдаланыңыз.",
     rateLimited: "⏳ Сұраныс тым көп. Бір сағаттан кейін қайталап көріңіз.",
     registerLink:
@@ -121,13 +125,13 @@ const TEXTS = {
   ru: {
     welcome: "Здравствуйте, <b>{name}</b>!\n\nДобро пожаловать в бот книжного магазина <b>Nur Karim</b>.",
     registerHow:
-      "Чтобы зарегистрироваться, нажмите кнопку «📱 Тіркелу / Регистрация» ниже и поделитесь номером. Мы пришлём ссылку для завершения регистрации.",
+      "Чтобы зарегистрироваться, нажмите в этом сообщении кнопку «📱 Подтвердить номер» и поделитесь номером. Мы пришлём ссылку для завершения регистрации.",
     resetHow:
-      "Чтобы обновить пароль, нажмите кнопку «📱 Тіркелу / Регистрация» ниже и поделитесь номером, на который зарегистрирован аккаунт. Мы пришлём ссылку для смены пароля.",
+      "Чтобы обновить пароль, нажмите в этом сообщении кнопку «📱 Подтвердить номер» и поделитесь номером, на который зарегистрирован аккаунт. Мы пришлём ссылку для смены пароля.",
     alreadyLinked:
       "Ваш Telegram привязан к номеру {phone}.\n\n/orders — последние заказы\n/reset — обновить пароль",
     contactReceived: "✅ Номер получен: <b>{phone}</b>",
-    notOwnContact: "⚠️ Поделитесь, пожалуйста, своим номером. Нажмите кнопку ниже — Telegram отправит его сам.",
+    notOwnContact: "⚠️ Поделитесь, пожалуйста, своим номером. Нажмите «📱 Подтвердить номер» — Telegram отправит его сам.",
     phoneUnsupported: "⚠️ С этим номером зарегистрироваться нельзя. Используйте казахстанский номер, начинающийся с +7.",
     rateLimited: "⏳ Слишком много запросов. Попробуйте снова через час.",
     registerLink:
@@ -276,7 +280,8 @@ async function send(chatId: number, text: string, markup?: ReplyMarkup): Promise
   if (!ok && BOT_TOKEN && markup && "inline_keyboard" in markup) {
     const links = markup.inline_keyboard
       .flat()
-      .map((b) => `<a href="${esc(b.url)}">${esc(b.text)}</a>`)
+      .filter((b) => b.url)
+      .map((b) => `<a href="${esc(b.url ?? "")}">${esc(b.text)}</a>`)
       .join("\n");
     return telegram("sendMessage", {
       chat_id: chatId,
@@ -288,9 +293,12 @@ async function send(chatId: number, text: string, markup?: ReplyMarkup): Promise
   return ok;
 }
 
-function contactKeyboard(): ReplyMarkup {
+function contactKeyboard(lang: Lang): ReplyMarkup {
+  if (MINI_APP) {
+    return { inline_keyboard: [[{ text: CONTACT_BUTTON[lang], web_app: { url: `${SITE_URL}/tg/verify?lang=${lang}` } }]] };
+  }
   return {
-    keyboard: [[{ text: CONTACT_BUTTON, request_contact: true }]],
+    keyboard: [[{ text: CONTACT_BUTTON[lang], request_contact: true }]],
     resize_keyboard: true,
     one_time_keyboard: true,
   };
@@ -388,7 +396,7 @@ async function handleStart(chatId: number, user: TgUser, payload: string) {
   const t = TEXTS[langOf(user)];
   const name = esc(user.first_name || user.username || t.friend);
   if (payload === "reset") {
-    await send(chatId, `${fill(t.welcome, { name })}\n\n${t.resetHow}`, contactKeyboard());
+    await send(chatId, `${fill(t.welcome, { name })}\n\n${t.resetHow}`, contactKeyboard(langOf(user)));
     return;
   }
   const linked = await profileByTelegram(user.id);
@@ -398,7 +406,7 @@ async function handleStart(chatId: number, user: TgUser, payload: string) {
     });
     return;
   }
-  await send(chatId, `${fill(t.welcome, { name })}\n\n${t.registerHow}`, contactKeyboard());
+  await send(chatId, `${fill(t.welcome, { name })}\n\n${t.registerHow}`, contactKeyboard(langOf(user)));
 }
 
 async function handleContact(chatId: number, user: TgUser, contact: TgContact) {
@@ -406,7 +414,7 @@ async function handleContact(chatId: number, user: TgUser, contact: TgContact) {
 
   // Only the user's own number proves ownership of the phone.
   if (!contact.user_id || contact.user_id !== user.id) {
-    await send(chatId, t.notOwnContact, contactKeyboard());
+    await send(chatId, t.notOwnContact, contactKeyboard(langOf(user)));
     return;
   }
 
@@ -447,7 +455,7 @@ async function handleOrders(chatId: number, user: TgUser) {
   const t = TEXTS[langOf(user)];
   const profile = await profileByTelegram(user.id);
   if (!profile) {
-    await send(chatId, t.notLinked, contactKeyboard());
+    await send(chatId, t.notLinked, contactKeyboard(langOf(user)));
     return;
   }
   const { data, error } = await db

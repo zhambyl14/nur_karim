@@ -46,7 +46,11 @@ function mapSignInError(error: AuthError | null): string {
 
 /** Password rules shared by registration and reset */
 const passwordPair = {
-  password: z.string().min(8, "PASSWORD_WEAK").max(72, "PASSWORD_TOO_LONG"),
+  // Supabase Auth (bcrypt) limits passwords to 72 bytes: Cyrillic letters take 2 bytes each.
+  password: z
+    .string()
+    .min(8, "PASSWORD_WEAK")
+    .refine((v) => Buffer.byteLength(v, "utf8") <= 72, "PASSWORD_TOO_LONG"),
   confirm: z.string(),
 };
 

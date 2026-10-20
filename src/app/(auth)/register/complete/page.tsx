@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { findValidTelegramToken, telegramDisplayName } from "@/lib/telegram-tokens";
 import { getI18n } from "@/lib/i18n/server";
+import { safeNext } from "@/lib/utils";
 import { env, telegramBotLink } from "@/lib/env";
 import { maskPhone } from "@/lib/phone";
 
@@ -24,7 +25,7 @@ export default async function RegisterCompletePage({
 }) {
   const { t } = await getI18n();
   const { token, next } = await searchParams;
-  const nextPath = typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : null;
+  const nextPath = typeof next === "string" ? safeNext(next, "") || null : null;
 
   // The one-time token from the Telegram bot is the authorization for this page.
   const row = typeof token === "string" ? await findValidTelegramToken(token, "register") : null;
