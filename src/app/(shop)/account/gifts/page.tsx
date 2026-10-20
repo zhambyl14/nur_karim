@@ -89,7 +89,6 @@ export default async function AccountGiftsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
-  const tab = sp.tab === "received" ? "received" : "sent";
   const [profile, { t, locale }] = await Promise.all([requireUser("/account/gifts"), getI18n()]);
   const supabase = await createSupabaseServer();
 
@@ -106,6 +105,9 @@ export default async function AccountGiftsPage({
   ]);
   const sent = (sentRes.data ?? []) as unknown as SentRow[];
   const received = (receivedRes.data ?? []) as unknown as ReceivedRow[];
+  // without an explicit tab, open «received» when the visitor has only received gifts
+  const tab =
+    sp.tab === "received" || (sp.tab !== "sent" && sent.length === 0 && received.length > 0) ? "received" : "sent";
   const failed = tab === "sent" ? !!sentRes.error : !!receivedRes.error;
 
   return (
@@ -114,7 +116,7 @@ export default async function AccountGiftsPage({
         {t("gift.account.title")}
       </h1>
       <nav aria-label={t("gift.account.tabs.label")} className="mt-4 flex gap-2">
-        <ChipLink href="/account/gifts" active={tab === "sent"}>
+        <ChipLink href="/account/gifts?tab=sent" active={tab === "sent"}>
           {t("gift.account.tabs.sent")}
           <span className="text-xs opacity-70">{sent.length}</span>
         </ChipLink>

@@ -481,7 +481,7 @@ export function ReaderView({
       {/* Pages */}
       <main
         ref={stageRef}
-        className={cn("nk-scroll relative min-h-0 flex-1 overflow-auto", stageTheme.stage)}
+        className={cn("nk-scroll nk-no-print relative min-h-0 flex-1 overflow-auto", stageTheme.stage)}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerCancel={() => (swipe.current = null)}

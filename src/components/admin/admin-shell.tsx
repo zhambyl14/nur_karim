@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/logo";
 import { Avatar } from "@/components/ui/misc";
 import { Modal } from "@/components/ui/modal";
+import { AdminLiveCounters } from "@/components/admin/admin-live-counters";
 import { ThemeToggle, LocaleSwitch } from "@/components/layout/controls";
 import type { AdminCounters, SessionUser } from "@/types/app";
 import type { TKey } from "@/lib/i18n/translate";
@@ -87,6 +88,7 @@ export function AdminShell({
 
   return (
     <div className="min-h-dvh bg-page lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
+      <AdminLiveCounters />
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh flex-col gap-1 overflow-y-auto bg-navy px-[18px] py-[26px] text-white lg:flex">
         <div className="flex items-center gap-2.5 px-2.5 pb-6">

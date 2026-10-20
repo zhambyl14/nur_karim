@@ -30,7 +30,7 @@ export function PaymentBlock({
   status,
   amount,
   payment,
-  deadlineHours,
+  deadline,
   receipt,
 }: {
   orderId: string;
@@ -39,7 +39,8 @@ export function PaymentBlock({
   status: "pending_payment" | "payment_review";
   amount: number;
   payment: { phone: string; bank: string; recipient: string; note: string };
-  deadlineHours: number;
+  /** when the unpaid order is auto-cancelled (formatted), null = never */
+  deadline: string | null;
   receipt: { url: string; pdf: boolean } | null;
 }) {
   const { t, te } = useI18n();
@@ -144,7 +145,7 @@ export function PaymentBlock({
 
       <div className="space-y-2 bg-subtle px-5 py-4 text-[12.5px] leading-relaxed text-muted sm:px-6">
         {payment.note && <p className="whitespace-pre-line">{payment.note}</p>}
-        {!review && deadlineHours > 0 && <p className="font-semibold text-wine-ink">{t("orders.payment.deadline", { hours: deadlineHours })}</p>}
+        {!review && deadline && <p className="font-semibold text-wine-ink">{t("orders.payment.deadline", { date: deadline })}</p>}
       </div>
 
       <div className="px-5 py-5 sm:px-6">

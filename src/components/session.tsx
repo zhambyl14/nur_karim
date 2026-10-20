@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 import { mergeCartLines, toRpcItems, useCart } from "@/lib/cart/store";
 import type { CartLine, SessionUser, UserCounters } from "@/types/app";
@@ -37,11 +38,38 @@ export function SessionProvider({
   }
   const counters = fresh ?? initialCounters ?? EMPTY_COUNTERS;
 
+  const userId = user?.id ?? null;
   const refreshCounters = useCallback(async () => {
-    if (!user) return;
+    if (!userId) return;
     const { data } = await getSupabaseBrowser().rpc("my_counters");
     if (data) setFresh(data as unknown as UserCounters);
-  }, [user]);
+  }, [userId]);
+
+  // Live unread badge: a store reply bumps conversations.user_unread, reading resets it.
+  useEffect(() => {
+    if (!userId) return;
+    const supabase = getSupabaseBrowser();
+    let channel: RealtimeChannel | null = null;
+    let cancelled = false;
+    // Realtime checks RLS with the user's JWT: set it before joining.
+    void supabase.auth.getSession().then(async ({ data }) => {
+      if (cancelled || !data.session) return;
+      await supabase.realtime.setAuth(data.session.access_token);
+      if (cancelled) return;
+      channel = supabase
+        .channel(`counters:${userId}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "conversations", filter: `user_id=eq.${userId}` },
+          () => void refreshCounters(),
+        )
+        .subscribe();
+    });
+    return () => {
+      cancelled = true;
+      if (channel) void supabase.removeChannel(channel);
+    };
+  }, [userId, refreshCounters]);
 
   return <SessionContext value={{ user, counters, refreshCounters }}>{children}</SessionContext>;
 }
@@ -69,6 +97,7 @@ export function CartSync() {
   const pull = useCallback(
     async (userId: string, mergeGuest: boolean) => {
       const supabase = getSupabaseBrowser();
+      const before = useCart.getState().lines;
       const { data, error } = await supabase
         .from("cart_items")
         .select("book_id, format, quantity")
@@ -76,10 +105,15 @@ export function CartSync() {
         .order("created_at");
       if (error) return;
       const server: CartLine[] = (data ?? []).map((r) => ({ bookId: r.book_id, format: r.format, quantity: r.quantity }));
-      const merged = mergeGuest ? mergeCartLines(server, useCart.getState().lines) : server;
+      // books added while the request was in flight (e.g. a quick «add to cart» right after the page loaded)
+      const addedMeanwhile = useCart
+        .getState()
+        .lines.filter((l) => !before.some((b) => b.bookId === l.bookId && b.format === l.format && b.quantity === l.quantity));
+      const local = mergeGuest ? useCart.getState().lines : addedMeanwhile;
+      const merged = local.length > 0 ? mergeCartLines(server, local) : server;
       useCart.getState().replace(merged, userId);
       const serialized = JSON.stringify(toRpcItems(useCart.getState().lines));
-      if (mergeGuest && serialized !== JSON.stringify(toRpcItems(server))) {
+      if (local.length > 0 && serialized !== JSON.stringify(toRpcItems(server))) {
         await supabase.rpc("replace_cart", { p_items: toRpcItems(useCart.getState().lines) });
       }
       lastSynced.current = serialized;

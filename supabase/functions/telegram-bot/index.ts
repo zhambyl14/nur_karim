@@ -32,7 +32,7 @@ const SUPABASE_URL = runtime.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = runtime.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 const TOKEN_TTL_MINUTES = 30;
-const MAX_TOKENS_PER_HOUR = 5;
+const MAX_TOKENS_PER_HOUR = 8;
 const CONTACT_BUTTON = { kk: "📱 Нөмірді растау", ru: "📱 Подтвердить номер" } as const;
 // The phone is confirmed through a Telegram Mini App (inline button inside the
 // message, WebApp.requestContact). Mini Apps need an https site; until the site
@@ -94,9 +94,12 @@ const TEXTS = {
       "⚠️ Тек өз нөміріңізбен бөлісіңіз. «📱 Нөмірді растау» батырмасын басыңыз — Telegram нөміріңізді өзі жібереді.",
     phoneUnsupported: "⚠️ Бұл нөмірмен тіркелу мүмкін емес. +7 басталатын Қазақстан нөмірін пайдаланыңыз.",
     rateLimited: "⏳ Сұраныс тым көп. Бір сағаттан кейін қайталап көріңіз.",
+    alreadyRegisteredShort: "ℹ️ <b>Бұл нөмір тіркелген.</b> Сайтқа телефон нөміріңіз бен құпиясөзіңіз арқылы кіріңіз.",
     registerLink:
       "Тіркелуді аяқтау үшін төмендегі батырманы басыңыз — сайтта аты-жөніңіз бен құпиясөзді жазасыз.\n\nСілтеме <b>{minutes} минут</b> жарамды және бір рет қолданылады. Оны ешкімге жібермеңіз.",
     registerButton: "Тіркелуді аяқтау",
+    backToSite:
+      "✅ <b>Нөміріңіз расталды!</b>\n\nЕнді сайт ашық тұрған браузерге (TikTok, Instagram немесе басқа) оралыңыз — тіркелу сол жерде өзі жалғасады, тек құпиясөз ойлап табасыз.\n\nСайт жабылып қалса, төмендегі батырманы басыңыз (сілтеме {minutes} минут жарамды).",
     alreadyRegistered:
       "ℹ️ <b>Бұл нөмір тіркелген.</b>\n\nСайтқа телефон нөміріңіз бен құпиясөзіңіз арқылы кіре аласыз. Құпиясөзді ұмытсаңыз, төмендегі батырма арқылы жаңартыңыз — сілтеме {minutes} минут жарамды.",
     linkedNow: "🔗 Telegram аккаунтыңыз сайттағы профильге байланыстырылды. Тапсырыс күйі туралы хабарламалар осы жерге келеді.",
@@ -134,9 +137,12 @@ const TEXTS = {
     notOwnContact: "⚠️ Поделитесь, пожалуйста, своим номером. Нажмите «📱 Подтвердить номер» — Telegram отправит его сам.",
     phoneUnsupported: "⚠️ С этим номером зарегистрироваться нельзя. Используйте казахстанский номер, начинающийся с +7.",
     rateLimited: "⏳ Слишком много запросов. Попробуйте снова через час.",
+    alreadyRegisteredShort: "ℹ️ <b>Этот номер уже зарегистрирован.</b> Войдите на сайт по номеру телефона и паролю.",
     registerLink:
       "Чтобы завершить регистрацию, нажмите кнопку ниже — на сайте нужно будет указать имя и пароль.\n\nСсылка действует <b>{minutes} минут</b> и используется один раз. Никому её не пересылайте.",
     registerButton: "Завершить регистрацию",
+    backToSite:
+      "✅ <b>Номер подтверждён!</b>\n\nВернитесь в браузер, где открыт сайт (TikTok, Instagram или другой), — регистрация продолжится там автоматически, останется только придумать пароль.\n\nЕсли сайт закрыт, нажмите кнопку ниже (ссылка действует {minutes} минут).",
     alreadyRegistered:
       "ℹ️ <b>Этот номер уже зарегистрирован.</b>\n\nВходите на сайт по номеру телефона и паролю. Если забыли пароль, обновите его кнопкой ниже — ссылка действует {minutes} минут.",
     linkedNow: "🔗 Ваш Telegram привязан к профилю на сайте. Уведомления о статусе заказов будут приходить сюда.",
@@ -347,9 +353,13 @@ async function recentTokenCount(phone: string, telegramId: number): Promise<numb
   return count ?? 0;
 }
 
-async function createToken(purpose: "register" | "reset", phone: string, user: TgUser): Promise<string> {
+async function createToken(
+  purpose: "register" | "reset",
+  phone: string,
+  user: TgUser,
+): Promise<{ token: string; id: string }> {
   const token = base64url(crypto.getRandomValues(new Uint8Array(32)));
-  const { error } = await db.from("telegram_tokens").insert({
+  const { data, error } = await db.from("telegram_tokens").insert({
     token_hash: await sha256Hex(token),
     purpose,
     phone,
@@ -359,9 +369,47 @@ async function createToken(purpose: "register" | "reset", phone: string, user: T
     last_name: user.last_name?.slice(0, 120) ?? null,
     language_code: user.language_code?.slice(0, 10) ?? null,
     expires_at: new Date(Date.now() + TOKEN_TTL_MINUTES * 60 * 1000).toISOString(),
-  });
+  }).select("id").single();
   if (error) throw error;
-  return token;
+  return { token, id: (data as { id: string }).id };
+}
+
+/** «r_<48 hex>»: registration started on the site (see migration telegram_auth_requests) */
+const SITE_REQUEST_RE = /^r_([0-9a-f]{48})$/;
+
+/** Remembers which Telegram user opened the site's registration request. */
+async function claimSiteRequest(code: string, user: TgUser): Promise<boolean> {
+  const { data, error } = await db
+    .from("telegram_auth_requests")
+    .update({ telegram_id: user.id })
+    .eq("code_hash", await sha256Hex(code))
+    .is("token_id", null)
+    .gt("expires_at", new Date().toISOString())
+    .select("id");
+  if (error) {
+    console.warn("telegram-bot: claim request failed", error.message);
+    return false;
+  }
+  return (data?.length ?? 0) > 0;
+}
+
+/** Attaches the issued token to the latest open site request of this Telegram user. */
+async function completeSiteRequest(user: TgUser, tokenId: string): Promise<boolean> {
+  const { data: open, error } = await db
+    .from("telegram_auth_requests")
+    .select("id")
+    .eq("telegram_id", user.id)
+    .is("token_id", null)
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !open) return false;
+  const { error: updateError } = await db
+    .from("telegram_auth_requests")
+    .update({ token_id: tokenId })
+    .eq("id", (open as { id: string }).id);
+  return !updateError;
 }
 
 /** Links this Telegram account to the profile when it has none yet. Returns true when linked now. */
@@ -395,6 +443,12 @@ async function linkTelegram(profile: ProfileRow, user: TgUser): Promise<boolean>
 async function handleStart(chatId: number, user: TgUser, payload: string) {
   const t = TEXTS[langOf(user)];
   const name = esc(user.first_name || user.username || t.friend);
+  const siteRequest = SITE_REQUEST_RE.exec(payload);
+  if (siteRequest) {
+    await claimSiteRequest(siteRequest[1], user);
+    await send(chatId, `${fill(t.welcome, { name })}\n\n${t.registerHow}`, contactKeyboard(langOf(user)));
+    return;
+  }
   if (payload === "reset") {
     await send(chatId, `${fill(t.welcome, { name })}\n\n${t.resetHow}`, contactKeyboard(langOf(user)));
     return;
@@ -424,17 +478,27 @@ async function handleContact(chatId: number, user: TgUser, contact: TgContact) {
     return;
   }
 
+  const profile = await profileByPhone(phone);
+
   if ((await recentTokenCount(phone, user.id)) >= MAX_TOKENS_PER_HOUR) {
+    // Already registered: no new link is needed to sign in, so do not just refuse.
+    if (profile) {
+      const linkedNow = await linkTelegram(profile, user);
+      await send(chatId, `${t.alreadyRegisteredShort}${linkedNow ? `\n\n${t.linkedNow}` : ""}`, {
+        inline_keyboard: [[{ text: t.loginButton, url: siteLink("/login") }]],
+      });
+      return;
+    }
     await send(chatId, t.rateLimited, { remove_keyboard: true });
     return;
   }
 
   await send(chatId, fill(t.contactReceived, { phone: formatPhone(phone) }), { remove_keyboard: true });
 
-  const profile = await profileByPhone(phone);
   if (profile) {
     const linkedNow = await linkTelegram(profile, user);
-    const token = await createToken("reset", phone, user);
+    const { token, id } = await createToken("reset", phone, user);
+    await completeSiteRequest(user, id);
     const text = `${fill(t.alreadyRegistered, { minutes: TOKEN_TTL_MINUTES })}${linkedNow ? `\n\n${t.linkedNow}` : ""}`;
     await send(chatId, text, {
       inline_keyboard: [
@@ -445,8 +509,9 @@ async function handleContact(chatId: number, user: TgUser, contact: TgContact) {
     return;
   }
 
-  const token = await createToken("register", phone, user);
-  await send(chatId, fill(t.registerLink, { minutes: TOKEN_TTL_MINUTES }), {
+  const { token, id } = await createToken("register", phone, user);
+  const fromSite = await completeSiteRequest(user, id);
+  await send(chatId, fill(fromSite ? t.backToSite : t.registerLink, { minutes: TOKEN_TTL_MINUTES }), {
     inline_keyboard: [[{ text: t.registerButton, url: siteLink(`/register/complete?token=${token}`) }]],
   });
 }

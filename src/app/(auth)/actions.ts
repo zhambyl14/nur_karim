@@ -1,22 +1,27 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { z } from "zod";
+import QRCode from "qrcode";
 import type { AuthError } from "@supabase/supabase-js";
 import { dictionaries } from "@/i18n";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getI18n } from "@/lib/i18n/server";
 import { interpolate } from "@/lib/i18n/translate";
-import { isValidPhone, normalizePhone, phoneToAuthEmail } from "@/lib/phone";
+import { isValidPhone, maskPhone, normalizePhone, phoneToAuthEmail } from "@/lib/phone";
 import { safeNext } from "@/lib/utils";
-import { env } from "@/lib/env";
+import { env, telegramBotLink } from "@/lib/env";
 import { esc, sendTelegramMessage } from "@/lib/telegram";
 import {
   consumeTelegramToken,
+  createAuthRequest,
   findValidTelegramToken,
+  isAuthRequestOpen,
+  readAuthRequest,
   releaseTelegramToken,
 } from "@/lib/telegram-tokens";
 import type { Locale } from "@/lib/i18n/config";
@@ -106,11 +111,9 @@ const registerSchema = z
       .string()
       .transform((v) => v.trim().replace(/\s+/g, " "))
       .pipe(z.string().min(2, "NAME_INVALID").max(120, "NAME_INVALID")),
-    ...passwordPair,
-    terms: z.literal("on", { message: "TERMS_REQUIRED" }),
+    password: passwordPair.password,
     next: z.string().max(500),
-  })
-  .refine((v) => v.password === v.confirm, { message: "PASSWORD_MISMATCH", path: ["confirm"] });
+  });
 
 export async function completeRegistrationAction(
   _prev: AuthFormState,
@@ -120,8 +123,6 @@ export async function completeRegistrationAction(
     token: text(formData.get("token")),
     fullName: text(formData.get("fullName")),
     password: text(formData.get("password")),
-    confirm: text(formData.get("confirm")),
-    terms: text(formData.get("terms")) || undefined,
     next: text(formData.get("next")),
   });
   if (!parsed.success) return firstIssue(parsed.error);
@@ -166,6 +167,7 @@ export async function completeRegistrationAction(
   }
 
   await consumeTelegramToken(row);
+  (await cookies()).delete(AUTH_REQUEST_COOKIE);
 
   const supabase = await createSupabaseServer();
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
@@ -243,4 +245,56 @@ export async function resetPasswordAction(_prev: AuthFormState, formData: FormDa
 
   revalidatePath("/", "layout");
   redirect(signInError ? "/login" : "/account");
+}
+
+/* ---------------------------------------------------------------------------
+   Registration started on the site: the browser waits while the phone is
+   confirmed in Telegram, then finishes the registration in place.
+   --------------------------------------------------------------------------- */
+const AUTH_REQUEST_COOKIE = "nk_tg_request";
+
+async function qrSvg(url: string): Promise<string> {
+  try {
+    return await QRCode.toString(url, {
+      type: "svg",
+      margin: 0,
+      errorCorrectionLevel: "M",
+      color: { dark: "#10223f", light: "#ffffff" },
+    });
+  } catch {
+    return "";
+  }
+}
+
+export async function startTelegramRegistrationAction(): Promise<{ ok: true; url: string; qr: string } | { ok: false }> {
+  if (!env.telegramBotUsername) return { ok: false };
+  const store = await cookies();
+  const existing = store.get(AUTH_REQUEST_COOKIE)?.value;
+  if (existing && (await isAuthRequestOpen(existing))) {
+    const url = telegramBotLink(`r_${existing}`);
+    return { ok: true, url, qr: await qrSvg(url) };
+  }
+  const code = await createAuthRequest();
+  if (!code) return { ok: false };
+  store.set(AUTH_REQUEST_COOKIE, code, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 30 * 60,
+  });
+  const url = telegramBotLink(`r_${code}`);
+  return { ok: true, url, qr: await qrSvg(url) };
+}
+
+export type TelegramRegistrationPoll =
+  | { status: "missing" | "expired" | "pending" | "opened" | "used" | "registered" }
+  | { status: "verified"; token: string; phone: string; name: string; telegramUsername: string | null };
+
+export async function pollTelegramRegistrationAction(): Promise<TelegramRegistrationPoll> {
+  const store = await cookies();
+  const result = await readAuthRequest(store.get(AUTH_REQUEST_COOKIE)?.value);
+  if (result.status === "registered") return { status: "registered" };
+  if (result.status === "verified") return { ...result, phone: maskPhone(result.phone) };
+  return result;
 }

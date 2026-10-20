@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { History } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
@@ -73,6 +74,11 @@ function formatValue(field: string, value: unknown, dict: Dictionary, locale: "k
   if (Array.isArray(value)) return value.length ? value.join(", ") : a.empty_value;
   if (typeof value === "object") return JSON.stringify(value).slice(0, 80);
   return String(value);
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return { title: t("admin.activity.title") };
 }
 
 export default async function ActivityPage({

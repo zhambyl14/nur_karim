@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Package } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseServer } from "@/lib/supabase/server";
@@ -60,6 +61,16 @@ export default async function AdminOrdersPage({
     supabase.from("orders").select("total").gte("created_at", todayStart).in("status", ["paid", "shipped", "delivered"]),
     ...ORDER_STATUSES.map((s) => countFor(s)),
   ]);
+  const href = (qs: string) => (qs ? `/admin/orders?${qs}` : "/admin/orders");
+  if (listRes.error?.code === "PGRST103") {
+    // page past the end (old link, orders were filtered/cancelled): go to the last page
+    const { count } = await applyOrderFilters(
+      supabase.from("orders").select("id", { count: "exact", head: true }),
+      filters,
+    );
+    const last = Math.max(1, Math.ceil((count ?? 0) / ORDERS_PAGE_SIZE));
+    redirect(href(orderFiltersQuery(filters, { page: last })));
+  }
   const counts = Object.fromEntries(ORDER_STATUSES.map((s, i) => [s, statusRes[i].count ?? 0])) as Record<OrderStatus, number>;
   const rows = (listRes.data ?? []) as unknown as OrderListRow[];
   const found = listRes.count ?? 0;
@@ -71,7 +82,6 @@ export default async function AdminOrdersPage({
     { key: "", label: t("admin.orders.tabs.all"), count: allRes.count ?? 0 },
     ...ORDER_STATUSES.map((s) => ({ key: s, label: t(`admin.orders.tabs.${s}`), count: counts[s] })),
   ];
-  const href = (qs: string) => (qs ? `/admin/orders?${qs}` : "/admin/orders");
 
   return (
     <div className="mx-auto max-w-[1400px]">

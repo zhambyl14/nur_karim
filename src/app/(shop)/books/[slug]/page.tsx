@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description =
     localized(book, "description", locale).replace(/\s+/g, " ").slice(0, 180).trim() ||
     t("book.meta.description", { title: book.title, author: book.author, price: formatPrice(offerPrice(book)) });
-  const title = `${book.title} — ${book.author}`;
+  const title = book.author ? `${book.title} — ${book.author}` : book.title;
   return {
     title,
     description,
@@ -95,14 +95,16 @@ export default async function BookPage({ params }: Props) {
           ),
         }
       : null,
-    {
-      label: t("book.details.author"),
-      value: (
-        <Link href={authorHref} className="text-wine-ink hover:underline">
-          {book.author}
-        </Link>
-      ),
-    },
+    book.author
+      ? {
+          label: t("book.details.author"),
+          value: (
+            <Link href={authorHref} className="text-wine-ink hover:underline">
+              {book.author}
+            </Link>
+          ),
+        }
+      : null,
     book.publisher ? { label: t("book.details.publisher"), value: book.publisher } : null,
     book.publish_year ? { label: t("book.details.year"), value: String(book.publish_year) } : null,
     book.pages ? { label: t("book.details.pages"), value: String(book.pages) } : null,
@@ -124,7 +126,7 @@ export default async function BookPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "Book",
     name: book.title,
-    author: { "@type": "Person", name: book.author },
+    author: book.author ? { "@type": "Person", name: book.author } : undefined,
     url: `${env.siteUrl}/books/${book.slug}`,
     image: book.cover_url ?? undefined,
     description: description.slice(0, 500) || undefined,
@@ -249,11 +251,15 @@ export default async function BookPage({ params }: Props) {
                 {book.title}
               </h1>
               <p className="mt-2 text-[15px] text-muted">
-                <span className="sr-only">{t("book.byAuthor")}: </span>
-                <Link href={authorHref} className="font-semibold text-ink-2 underline-offset-4 hover:text-wine-ink hover:underline">
-                  {book.author}
-                </Link>
-                {book.pages ? ` · ${t("book.pagesCount", { count: book.pages })}` : ""}
+                {book.author && (
+                  <>
+                    <span className="sr-only">{t("book.byAuthor")}: </span>
+                    <Link href={authorHref} className="font-semibold text-ink-2 underline-offset-4 hover:text-wine-ink hover:underline">
+                      {book.author}
+                    </Link>
+                  </>
+                )}
+                {book.pages ? `${book.author ? " · " : ""}${t("book.pagesCount", { count: book.pages })}` : ""}
               </p>
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                 {book.rating_count > 0 ? (
@@ -329,7 +335,7 @@ export default async function BookPage({ params }: Props) {
             <BookShelf
               id="related-books"
               title={t("book.related.title")}
-              href={book.genre_slug ? `/catalog?genre=${encodeURIComponent(book.genre_slug)}` : authorHref}
+              href={book.genre_slug ? `/catalog?genre=${encodeURIComponent(book.genre_slug)}` : book.author ? authorHref : "/catalog"}
               linkLabel={t("home.sections.showAll")}
               books={related}
             />

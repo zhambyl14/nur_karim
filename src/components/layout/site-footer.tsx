@@ -6,6 +6,7 @@ import { localized } from "@/lib/i18n/translate";
 import { getSettings } from "@/lib/data/common";
 import { phoneHref, whatsappHref } from "@/lib/phone";
 import { Logo } from "@/components/brand/logo";
+import { LocaleSwitch } from "@/components/layout/controls";
 
 export async function SiteFooter() {
   const [{ t, locale }, settings] = await Promise.all([getI18n(), getSettings()]);
@@ -72,9 +73,12 @@ export async function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-white/[0.08]">
-        <div className="nk-container flex flex-col gap-2 py-6 text-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="nk-container flex flex-col gap-2 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6 text-xs sm:flex-row sm:items-center sm:justify-between md:pb-6">
           <span>{t("nav.footer.rights", { year: new Date().getFullYear() })}</span>
-          <span className="font-semibold text-white/80">Nur Karim</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-semibold text-white/80">Nur Karim</span>
+            <LocaleSwitch className="sm:hidden" />
+          </div>
         </div>
       </div>
     </footer>

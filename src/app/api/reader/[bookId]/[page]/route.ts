@@ -52,6 +52,9 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/reader/[
   const { book } = access;
 
   let watermark: Parameters<typeof renderPage>[1];
+  /** device + rate limit checks run in parallel with the storage download */
+  let gate: Promise<NextResponse | null> = Promise.resolve(null);
+  let logAccess = false;
   const isPreviewPage = previewAvailable(book) && page <= book.previewPages;
   const wantsPreview = request.nextUrl.searchParams.get("preview") === "1";
 
@@ -60,19 +63,16 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/reader/[
   } else if (access.fullAccess && profile) {
     if (!deviceId) return fail(400, "VALIDATION");
     if (!access.isAdmin) {
-      const allowed = await touchDevice(profile.id, deviceId, settings.ebook_max_devices, request.headers.get("user-agent"));
-      if (!allowed) return fail(403, "DEVICE_LIMIT");
-      const recent = await recentPageCount(profile.id);
-      if (recent >= settings.ebook_pages_per_10min) return fail(429, "RATE_LIMITED", { "Retry-After": "120" });
+      gate = Promise.all([
+        touchDevice(profile.id, deviceId, settings.ebook_max_devices, request.headers.get("user-agent")),
+        recentPageCount(profile.id),
+      ]).then(([allowed, recent]) => {
+        if (!allowed) return fail(403, "DEVICE_LIMIT");
+        if (recent >= settings.ebook_pages_per_10min) return fail(429, "RATE_LIMITED", { "Retry-After": "120" });
+        return null;
+      });
     }
-    const ip = clientIp(request.headers);
-    after(async () => {
-      try {
-        await logPageAccess({ userId: profile.id, bookId, page, deviceId, ip });
-      } catch (error) {
-        console.warn("reader: access log failed", error);
-      }
-    });
+    logAccess = true;
     watermark = { kind: "owner", userId: profile.id, phone: profile.phone, fullName: profile.full_name };
   } else if (isPreviewPage) {
     watermark = { kind: "preview" };
@@ -80,10 +80,23 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/reader/[
     return fail(profile ? 403 : 401, profile ? "FORBIDDEN" : "AUTH_REQUIRED");
   }
 
-  const { data: file, error } = await createSupabaseAdmin()
-    .storage.from(EBOOK_PAGES_BUCKET)
-    .download(ebookPagePath(book.id, book.version, page));
+  const [denied, { data: file, error }] = await Promise.all([
+    gate,
+    createSupabaseAdmin().storage.from(EBOOK_PAGES_BUCKET).download(ebookPagePath(book.id, book.version, page)),
+  ]);
+  if (denied) return denied;
   if (error || !file) return fail(404, "NOT_FOUND");
+
+  if (logAccess && profile) {
+    const ip = clientIp(request.headers);
+    after(async () => {
+      try {
+        await logPageAccess({ userId: profile.id, bookId, page, deviceId, ip });
+      } catch (err) {
+        console.warn("reader: access log failed", err);
+      }
+    });
+  }
 
   let body: Buffer;
   try {

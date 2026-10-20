@@ -62,7 +62,7 @@ export function SiteHeader() {
           <span className="truncate">{t("nav.searchShort")}</span>
         </button>
 
-        <div className="ml-auto flex items-center gap-2 md:ml-0 lg:ml-auto">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2 md:ml-0 lg:ml-auto">
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
@@ -72,7 +72,7 @@ export function SiteHeader() {
             <Search className="size-[18px]" />
           </button>
           <ThemeToggle />
-          <LocaleSwitch className="hidden sm:grid" />
+          <LocaleSwitch className="hidden min-w-10 px-2.5 min-[385px]:grid sm:min-w-12 sm:px-3" />
           {user && (
             <Link
               href="/account/library"

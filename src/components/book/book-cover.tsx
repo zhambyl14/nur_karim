@@ -6,10 +6,10 @@ type CoverSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 const TYPO: Record<CoverSize, { pad: string; inset: string; label: string; title: string; author: string }> = {
   xs: { pad: "p-[7px]", inset: "inset-[4px]", label: "hidden", title: "text-[9px] leading-[1.15]", author: "hidden" },
-  sm: { pad: "px-3 py-3.5", inset: "inset-[6px]", label: "text-[7px]", title: "text-[15px] leading-[1.18]", author: "text-[9px]" },
-  md: { pad: "px-4 py-[18px]", inset: "inset-2", label: "text-[8px]", title: "text-[19px] leading-[1.18]", author: "text-[10px]" },
-  lg: { pad: "px-[22px] py-[26px]", inset: "inset-[10px]", label: "text-[9px]", title: "text-[26px] leading-[1.12]", author: "text-[11px]" },
-  xl: { pad: "px-7 py-8", inset: "inset-3", label: "text-[10px]", title: "text-[32px] leading-[1.1]", author: "text-[13px]" },
+  sm: { pad: "px-3 py-3.5", inset: "inset-[6px]", label: "text-[7px]", title: "text-[clamp(11px,10cqw,15px)] leading-[1.18]", author: "text-[9px]" },
+  md: { pad: "px-4 py-[18px]", inset: "inset-2", label: "text-[8px]", title: "text-[clamp(13px,10cqw,19px)] leading-[1.18]", author: "text-[10px]" },
+  lg: { pad: "px-[22px] py-[26px]", inset: "inset-[10px]", label: "text-[9px]", title: "text-[clamp(17px,10.5cqw,26px)] leading-[1.12]", author: "text-[11px]" },
+  xl: { pad: "px-7 py-8", inset: "inset-3", label: "text-[10px]", title: "text-[clamp(20px,10.5cqw,32px)] leading-[1.1]", author: "text-[13px]" },
 };
 
 const SIZES_ATTR: Record<CoverSize, string> = {
@@ -53,7 +53,7 @@ export function BookCover({
   return (
     <div
       className={cn(
-        "relative aspect-[3/4] w-full overflow-hidden ring-1 ring-black/[0.04] dark:ring-white/10",
+        "@container relative aspect-[3/4] w-full overflow-hidden ring-1 ring-black/[0.04] dark:ring-white/10",
         rounded && (size === "xs" ? "rounded-[2px_6px_6px_2px]" : "rounded-[4px_9px_9px_4px]"),
         className,
       )}
@@ -76,7 +76,7 @@ export function BookCover({
         <div className={cn("absolute inset-0 flex flex-col justify-between", typo.pad)}>
           <div className={cn("pointer-events-none absolute border", typo.inset)} style={{ borderColor: p.frame }} />
           <div className={cn("font-sans font-bold tracking-[.24em] opacity-65", typo.label)}>NUR KARIM</div>
-          <div className={cn("font-serif font-medium [text-wrap:balance]", typo.title)}>{title}</div>
+          <div className={cn("font-serif font-medium [overflow-wrap:anywhere] [text-wrap:balance]", typo.title)}>{title}</div>
           <div className={cn("truncate font-sans font-medium opacity-65", typo.author)}>{author}</div>
         </div>
       )}

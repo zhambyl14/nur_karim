@@ -73,19 +73,19 @@ export function Postcard({
           >
             Nur Karim
           </span>
-          <span className={cn("leading-none", size === "sm" ? "text-2xl" : "text-4xl sm:text-5xl")} aria-hidden>
+          <span className={cn("leading-none", size === "sm" ? "text-xl sm:text-2xl" : "text-4xl sm:text-5xl")} aria-hidden>
             {p.emoji}
           </span>
         </div>
         <div
           className={cn(
             "font-serif font-semibold leading-[1.12] tracking-[-0.01em]",
-            size === "sm" ? "mt-1 line-clamp-3 text-[15px] sm:text-[17px]" : size === "md" ? "mt-3 text-[26px] sm:text-[30px]" : "mt-4 text-[30px] sm:text-[40px]",
+            size === "sm" ? "mt-1 line-clamp-3 shrink-0 text-[13.5px] sm:text-[17px]" : size === "md" ? "mt-3 text-[26px] sm:text-[30px]" : "mt-4 text-[30px] sm:text-[40px]",
           )}
         >
           {headline}
         </div>
-        <div className="my-3 flex items-center gap-2" aria-hidden>
+        <div className={cn("flex items-center gap-2", size === "sm" ? "my-2 sm:my-3" : "my-3")} aria-hidden>
           <span className="h-px w-10" style={{ background: "var(--pc-accent)" }} />
           <span className="size-1.5 rotate-45" style={{ background: "var(--pc-accent)" }} />
           <span className="h-px flex-1 opacity-40" style={{ background: "var(--pc-accent)" }} />

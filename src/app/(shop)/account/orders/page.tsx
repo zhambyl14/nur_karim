@@ -28,7 +28,8 @@ export default async function AccountOrdersPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
-  const tab: Tab = sp.tab === "completed" || sp.tab === "cancelled" ? sp.tab : "active";
+  const requested: Tab | null =
+    sp.tab === "active" || sp.tab === "completed" || sp.tab === "cancelled" ? sp.tab : null;
   const [profile, { t, locale }] = await Promise.all([requireUser("/account/orders"), getI18n()]);
   const supabase = await createSupabaseServer();
   const { data, error } = await supabase
@@ -41,6 +42,8 @@ export default async function AccountOrdersPage({
     .limit(200);
   const all = (data ?? []) as unknown as OrderListRow[];
   const count = (k: Tab) => all.filter((o) => (TABS[k] as readonly OrderStatus[]).includes(o.status)).length;
+  // without an explicit tab, open the first tab that has orders (no "no orders yet" when there are some)
+  const tab: Tab = requested ?? (Object.keys(TABS) as Tab[]).find((k) => count(k) > 0) ?? "active";
   const orders = all.filter((o) => (TABS[tab] as readonly OrderStatus[]).includes(o.status));
 
   return (
@@ -48,7 +51,7 @@ export default async function AccountOrdersPage({
       <h1 className="font-serif text-[28px] font-semibold tracking-[-0.01em] text-ink sm:text-[32px]">{t("orders.title")}</h1>
       <nav aria-label={t("orders.tabs.label")} className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
         {(Object.keys(TABS) as Tab[]).map((k) => (
-          <ChipLink key={k} href={k === "active" ? "/account/orders" : `/account/orders?tab=${k}`} active={tab === k}>
+          <ChipLink key={k} href={`/account/orders?tab=${k}`} active={tab === k}>
             {t(`orders.tabs.${k}`)}
             <span className="text-xs opacity-70">{count(k)}</span>
           </ChipLink>

@@ -40,7 +40,7 @@ export function BookPublishSwitch({ book, withLabel }: Props & { withLabel?: boo
   return (
     <div className={cn(pending && "opacity-70")}>
       <Switch
-        id={`publish-${book.id}`}
+        id={`publish-${withLabel ? "card-" : ""}${book.id}`}
         checked={published}
         onChange={toggle}
         disabled={pending}

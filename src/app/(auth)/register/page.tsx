@@ -3,8 +3,7 @@ import Link from "next/link";
 import { Clock, KeyRound, ShieldCheck, Smartphone, Send } from "lucide-react";
 import { AuthScreen, FormAlert } from "@/components/auth/auth-screen";
 import { AuthSteps } from "@/components/auth/auth-steps";
-import { TelegramLinkButton } from "@/components/auth/telegram-link-button";
-import { TelegramQr } from "@/components/auth/telegram-qr";
+import { TelegramRegisterFlow } from "@/components/auth/telegram-register-flow";
 import { StoreContacts } from "@/components/auth/store-contacts";
 import { getSettings } from "@/lib/data/common";
 import { getI18n } from "@/lib/i18n/server";
@@ -53,14 +52,11 @@ export default async function RegisterPage({
 
       {botReady ? (
         <div className="mt-4 grid gap-4">
-          <TelegramLinkButton href={botUrl}>{t("auth.register.cta")}</TelegramLinkButton>
-          <div className="hidden items-center gap-5 rounded-[18px] border border-line bg-card-2 p-4 md:flex">
-            <TelegramQr url={botUrl} label={t("auth.register.qrAlt")} className="size-[112px] shrink-0 p-2" />
-            <div className="min-w-0">
-              <div className="text-sm font-bold text-ink">{t("auth.register.qrTitle")}</div>
-              <p className="mt-1 text-[13px] leading-relaxed text-muted">{t("auth.register.qrText")}</p>
-            </div>
-          </div>
+          <TelegramRegisterFlow
+            fallbackUrl={botUrl}
+            next={nextPath}
+            resetHref={telegramBotLink("reset")}
+          />
         </div>
       ) : (
         <div className="mt-4 grid gap-3">

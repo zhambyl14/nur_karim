@@ -21,14 +21,11 @@ const manrope = Manrope({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { locale } = await getI18n();
-  const description =
-    locale === "ru"
-      ? "Nur Karim — магазин религиозных, исторических и познавательных книг. Бумажные и электронные книги, доставка по Казахстану, подарок другу."
-      : "Nur Karim — діни, тарихи және танымдық кітаптар дүкені. Қағаз және электронды кітаптар, Қазақстан бойынша жеткізу, досыңа сыйлық.";
+  const { locale, t } = await getI18n();
+  const description = t("home.meta.description");
   return {
     metadataBase: new URL(env.siteUrl),
-    title: { default: "Nur Karim — кітап дүкені", template: "%s · Nur Karim" },
+    title: { default: t("home.meta.title"), template: "%s · Nur Karim" },
     description,
     applicationName: "Nur Karim",
     openGraph: {

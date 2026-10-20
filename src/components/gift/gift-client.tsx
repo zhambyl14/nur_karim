@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/client";
 import { useMounted } from "@/lib/hooks";
 import { isValidPhone } from "@/lib/phone";
+import { getSupabaseBrowser } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Field, Textarea } from "@/components/ui/field";
@@ -237,6 +238,13 @@ export function GiftClaim({
       toast.error(te(res.error));
     });
 
+  // /login sends signed-in visitors straight back, so sign out first
+  const switchAccount = async () => {
+    await getSupabaseBrowser().auth.signOut();
+    router.push(`/login?next=${next}`);
+    router.refresh();
+  };
+
   return (
     <div>
       <Button size="lg" onClick={claim} loading={pending} leftIcon={<BookOpenCheck className="size-[18px]" aria-hidden />}>
@@ -250,9 +258,13 @@ export function GiftClaim({
             <p className="mt-0.5 text-[13px] leading-relaxed text-warning/90">
               {t("gift.claim.mismatchText", { phone: mismatch })}
             </p>
-            <Link href={`/login?next=${next}`} className="mt-2 inline-block text-[13px] font-bold text-wine-ink hover:underline">
+            <button
+              type="button"
+              onClick={switchAccount}
+              className="mt-2 inline-block text-[13px] font-bold text-wine-ink hover:underline"
+            >
               {t("gift.claim.switchAccount")}
-            </Link>
+            </button>
           </div>
         </div>
       )}

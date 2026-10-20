@@ -169,7 +169,14 @@ export default async function OrderPage({ params, searchParams }: Props) {
                 recipient: settings.payment_recipient,
                 note: localized(settings, "payment_note", locale),
               }}
-              deadlineHours={settings.order_auto_cancel_hours}
+              deadline={
+                settings.order_auto_cancel_hours > 0
+                  ? formatDateTime(
+                      new Date(new Date(order.created_at).getTime() + settings.order_auto_cancel_hours * 3_600_000),
+                      locale,
+                    )
+                  : null
+              }
               receipt={receipt}
             />
           )}

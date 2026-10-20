@@ -42,7 +42,6 @@ export function clamp(value: number, min: number, max: number) {
 export function safeNext(next: string | null | undefined, fallback = "/"): string {
   // Browsers drop tabs / newlines and treat "\" as "/" in URLs, so "/\t/evil.com"
   // would become "//evil.com": reject control characters and backslashes anywhere.
-  // eslint-disable-next-line no-control-regex
   if (!next || !next.startsWith("/") || next.startsWith("//") || /[\\\u0000-\u001f\u007f]/.test(next)) {
     return fallback;
   }

@@ -52,7 +52,7 @@ export function Hero({
             action="/catalog"
             method="get"
             role="search"
-            className="relative z-10 -mb-7 mt-5 flex h-[56px] items-center gap-2 rounded-2xl bg-white p-1.5 pl-4 shadow-[0_18px_40px_rgba(11,24,48,.35)] sm:mb-0 sm:mt-8 sm:h-[62px] sm:max-w-[590px] sm:pl-5"
+            className="relative z-10 -mb-7 mt-5 flex h-[56px] items-center gap-2 rounded-2xl bg-white p-1.5 pl-4 shadow-[0_18px_40px_rgba(11,24,48,.35)] focus-within:ring-2 focus-within:ring-gold sm:mb-0 sm:mt-8 sm:h-[62px] sm:max-w-[590px] sm:pl-5"
           >
             <label htmlFor="hero-q" className="sr-only">
               {t("home.hero.searchLabel")}

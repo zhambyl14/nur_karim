@@ -29,17 +29,6 @@ export const CHART_COLORS = {
   axis: "var(--nk-faint)",
 };
 
-export const SERIES_COLORS = [
-  "var(--nk-primary)",
-  "var(--nk-wine)",
-  "var(--nk-gold)",
-  "var(--nk-info)",
-  "var(--nk-success)",
-  "var(--nk-violet)",
-  "var(--nk-warning)",
-  "var(--nk-faint)",
-];
-
 const AXIS_TICK = { fill: CHART_COLORS.axis, fontSize: 11, fontWeight: 600 };
 
 function TooltipBox({ title, rows }: { title: ReactNode; rows: { label: ReactNode; value: ReactNode; color?: string }[] }) {
@@ -148,7 +137,15 @@ export function MonthlyChart({ data }: { data: MonthPoint[] }) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 0, bottom: 0, left: 0 }}>
           <CartesianGrid vertical={false} stroke={CHART_COLORS.grid} strokeDasharray="3 4" />
-          <XAxis dataKey="month" tickFormatter={monthLabel} tick={AXIS_TICK} axisLine={false} tickLine={false} interval={0} />
+          <XAxis
+            dataKey="month"
+            tickFormatter={monthLabel}
+            tick={AXIS_TICK}
+            axisLine={false}
+            tickLine={false}
+            interval="preserveStartEnd"
+            minTickGap={6}
+          />
           <YAxis tickFormatter={(v: number) => formatCompact(v)} tick={AXIS_TICK} axisLine={false} tickLine={false} width={44} />
           <Tooltip
             cursor={{ fill: "var(--nk-subtle)" }}

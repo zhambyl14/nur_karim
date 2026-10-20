@@ -1514,6 +1514,41 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_auth_requests: {
+        Row: {
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          telegram_id: number | null
+          token_id: string | null
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          telegram_id?: number | null
+          token_id?: string | null
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          telegram_id?: number | null
+          token_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_auth_requests_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       telegram_tokens: {
         Row: {
           created_at: string
