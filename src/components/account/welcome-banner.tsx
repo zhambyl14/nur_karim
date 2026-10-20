@@ -9,11 +9,11 @@ export async function WelcomeBanner() {
   return (
     <section
       aria-labelledby="welcome-title"
-      className="nk-hero-bg relative mb-5 animate-scale-in overflow-hidden rounded-[22px] p-5 text-white sm:p-7"
+      className="nk-hero-bg relative animate-scale-in overflow-hidden rounded-[22px] p-5 text-white sm:p-7"
     >
       {/* confetti of brand diamonds */}
-      <span aria-hidden className="absolute right-10 top-6 size-3 rotate-45 bg-gold animate-float" />
-      <span aria-hidden className="absolute right-24 top-14 size-2 rotate-45 bg-white/50 animate-float [animation-delay:400ms]" />
+      <span aria-hidden className="absolute right-16 top-14 size-3 rotate-45 bg-gold animate-float" />
+      <span aria-hidden className="absolute right-28 top-20 size-2 rotate-45 bg-white/50 animate-float [animation-delay:400ms]" />
       <span aria-hidden className="absolute bottom-8 right-16 size-2.5 rotate-45 bg-wine animate-float [animation-delay:800ms]" />
       <span aria-hidden className="absolute -right-12 -top-12 size-40 rotate-45 border border-gold/25" />
 

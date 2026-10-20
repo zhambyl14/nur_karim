@@ -183,6 +183,13 @@ const orders: Dictionary["orders"] = {
     clientNew: "🧾 <b>Заказ {number} принят</b>\n\nСумма к оплате: <b>{amount}</b>\nНомер для перевода: <b>{phone}</b>\nБанк: {bank}{recipient}\nВ комментарии укажите: <b>{comment}</b>\n\nПосле перевода нажмите «Я оплатил(а)» на странице заказа на сайте.",
     recipientLine: "\nПолучатель: {name}",
     openOrder: "Открыть заказ",
+    adminNew: "🛒 <b>Новый заказ {number}</b>\n\nКлиент: {client}\nСумма: <b>{total}</b>\nДоставка: {delivery}{gift}",
+    adminGift: "\n🎁 Подарок: {name}",
+    adminPaid: "💳 <b>Заказ {number}: клиент сообщил об оплате</b>\n\nКлиент: {client}\nСумма: <b>{total}</b>{receipt}",
+    adminReceipt: "\n🧾 Чек загружен",
+    adminCancelled: "✖️ <b>Заказ {number}: клиент отменил заказ</b>\n\nКлиент: {client}",
+    adminQuestion: "❓ <b>Вопрос по заказу {number}</b>\n\nКлиент: {client}\n\n«{message}»",
+    openQuestion: "Открыть сообщения",
   },
 };
 

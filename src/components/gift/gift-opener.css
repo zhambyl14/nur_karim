@@ -1,0 +1,160 @@
+/* Envelope opening animation for the gift page */
+.nk-gift-stage {
+  perspective: 1200px;
+}
+
+.nk-gift-envelope {
+  position: relative;
+  width: min(320px, 82vw);
+  aspect-ratio: 4 / 3;
+  margin-inline: auto;
+  animation: nk-gift-float 4.5s ease-in-out infinite;
+}
+
+.nk-gift-back,
+.nk-gift-front,
+.nk-gift-flap {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+}
+
+.nk-gift-back {
+  background: linear-gradient(160deg, #7d1a35 0%, #5c1227 100%);
+  box-shadow: 0 30px 60px rgb(11 24 48 / 0.35);
+}
+
+.nk-gift-letter {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 10%;
+  bottom: 8%;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #f7efe0 0%, #efe3cc 100%);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
+  display: grid;
+  place-items: center;
+  font-size: 44px;
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.45s;
+}
+
+.nk-gift-front {
+  background:
+    linear-gradient(to top right, #8e2342 49.6%, transparent 50%) left bottom / 50.5% 100% no-repeat,
+    linear-gradient(to top left, #8e2342 49.6%, transparent 50%) right bottom / 50.5% 100% no-repeat;
+  border-radius: 0 0 18px 18px;
+}
+
+.nk-gift-flap {
+  bottom: auto;
+  height: 58%;
+  transform-origin: top center;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(180deg, #9b2a4a 0%, #7d1a35 100%);
+  border-radius: 18px 18px 0 0;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3;
+}
+
+.nk-gift-seal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  width: 58px;
+  height: 58px;
+  transform: translate(-50%, -38%) rotate(45deg);
+  border-radius: 12px;
+  background: radial-gradient(circle at 35% 30%, #e6c886 0%, #c8a35a 55%, #a7843f 100%);
+  box-shadow:
+    0 0 0 4px rgb(200 163 90 / 0.25),
+    0 8px 18px rgb(0 0 0 / 0.25);
+  transition:
+    transform 0.4s ease,
+    opacity 0.4s ease;
+}
+
+.nk-gift-opening .nk-gift-flap {
+  transform: rotateX(180deg);
+  z-index: 0;
+}
+
+.nk-gift-opening .nk-gift-seal {
+  opacity: 0;
+  transform: translate(-50%, -38%) rotate(45deg) scale(0.4);
+}
+
+.nk-gift-opening .nk-gift-letter {
+  transform: translateY(-46%);
+}
+
+.nk-gift-opening.nk-gift-envelope {
+  animation: none;
+}
+
+.nk-gift-sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #c8a35a;
+  opacity: 0;
+  transform: rotate(45deg);
+}
+
+.nk-gift-opening .nk-gift-sparkle {
+  animation: nk-gift-burst 1.1s ease-out 0.5s forwards;
+}
+
+.nk-gift-reveal {
+  animation: nk-gift-reveal 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes nk-gift-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+@keyframes nk-gift-burst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(45deg) scale(0.4);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) rotate(225deg) scale(1);
+  }
+}
+
+@keyframes nk-gift-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-gift-envelope,
+  .nk-gift-opening .nk-gift-sparkle,
+  .nk-gift-reveal {
+    animation: none;
+  }
+  .nk-gift-flap,
+  .nk-gift-letter,
+  .nk-gift-seal {
+    transition: none;
+  }
+}

@@ -181,6 +181,13 @@ const orders = {
     clientNew: "🧾 <b>Тапсырыс {number} қабылданды</b>\n\nТөлеу сомасы: <b>{amount}</b>\nАударым нөмірі: <b>{phone}</b>\nБанк: {bank}{recipient}\nТүсініктемеге жазыңыз: <b>{comment}</b>\n\nТөлем жасаған соң сайттағы тапсырыс бетінде «Төледім» батырмасын басыңыз.",
     recipientLine: "\nАлушы: {name}",
     openOrder: "Тапсырысты ашу",
+    adminNew: "🛒 <b>Жаңа тапсырыс {number}</b>\n\nКлиент: {client}\nСомасы: <b>{total}</b>\nЖеткізу: {delivery}{gift}",
+    adminGift: "\n🎁 Сыйлық: {name}",
+    adminPaid: "💳 <b>Тапсырыс {number}: клиент төлем жасағанын хабарлады</b>\n\nКлиент: {client}\nСомасы: <b>{total}</b>{receipt}",
+    adminReceipt: "\n🧾 Чек жүктелді",
+    adminCancelled: "✖️ <b>Тапсырыс {number}: клиент бас тартты</b>\n\nКлиент: {client}",
+    adminQuestion: "❓ <b>Тапсырыс {number} бойынша сұрақ</b>\n\nКлиент: {client}\n\n«{message}»",
+    openQuestion: "Хабарламаларды ашу",
   },
 };
 

@@ -31,8 +31,11 @@ function isOptimizable(url: string) {
 
 function SlideLink({ href, children, label }: { href: string | null; children: ReactNode; label: string }) {
   const className = "block h-full w-full rounded-[22px] focus-visible:outline-offset-[-4px]";
-  if (!href) return <div className="h-full w-full">{children}</div>;
-  if (/^https?:\/\//.test(href)) {
+  // only same-site paths ("/catalog?...") and http(s) links; anything else (javascript:, data:, "//host") is ignored
+  const external = !!href && /^https?:\/\//i.test(href);
+  const internal = !!href && href.startsWith("/") && !href.startsWith("//") && !href.startsWith("/\\");
+  if (!href || (!external && !internal)) return <div className="h-full w-full">{children}</div>;
+  if (external) {
     return (
       <a href={href} className={className} aria-label={label} target="_blank" rel="noopener noreferrer">
         {children}

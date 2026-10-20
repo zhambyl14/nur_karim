@@ -28,6 +28,10 @@ const checkout: Dictionary["checkout"] = {
     name: "Ваше имя и фамилия",
     phone: "Ваш номер телефона",
     hint: "Уведомления о заказе придут на этот номер и в Telegram.",
+    errors: {
+      name: "Укажите имя и фамилию",
+      phone: "Введите номер полностью",
+    },
   },
   delivery: {
     astana: "Курьер по Астане",
@@ -141,6 +145,7 @@ const checkout: Dictionary["checkout"] = {
     quote: "Не удалось рассчитать сумму",
   },
   success: "Заказ принят!",
+  redirecting: "Открываем страницу заказа…",
 };
 
 export default checkout;
