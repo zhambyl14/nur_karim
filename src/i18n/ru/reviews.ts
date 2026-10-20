@@ -1,5 +1,66 @@
 import type { Dictionary } from "../kk";
 
-const reviews: Dictionary["reviews"] = {};
+const reviews: Dictionary["reviews"] = {
+  title: "Отзывы",
+  count: "{count} отзыв|{count} отзыва|{count} отзывов",
+  average: "Средняя оценка",
+  basedOn: "на основе {count} отзыва|на основе {count} отзывов|на основе {count} отзывов",
+  distribution: "Распределение оценок",
+  starsRow: "{stars} зв.",
+  starsRowCount: "{stars} зв.: {count}",
+  empty: {
+    title: "Пока нет отзывов",
+    text: "Станьте первым читателем, который поделится впечатлениями об этой книге.",
+  },
+  showMore: "Показать ещё {count}",
+  adminReply: "Ответ магазина",
+  edited: "изменён",
+  yours: "Ваш отзыв",
+  hiddenNote: "Ваш отзыв скрыт модератором, его видите только вы.",
+  form: {
+    title: "Оставить отзыв",
+    editTitle: "Редактировать отзыв",
+    ratingLabel: "Ваша оценка",
+    ratingRequired: "Поставьте оценку звёздами",
+    star: "{count} звезда|{count} звезды|{count} звёзд",
+    starNames: {
+      "1": "Не понравилось",
+      "2": "Ниже среднего",
+      "3": "Неплохо",
+      "4": "Хорошо",
+      "5": "Отлично",
+    },
+    bodyLabel: "Ваш отзыв",
+    bodyPlaceholder: "Чем понравилась книга? Кому бы вы её посоветовали?",
+    counter: "{count} / 2000",
+    submit: "Опубликовать",
+    save: "Сохранить",
+    cancel: "Отмена",
+    edit: "Изменить",
+    delete: "Удалить",
+    deleteConfirm: "Удалить ваш отзыв?",
+    deleteText: "Отзыв и оценка исчезнут со страницы книги.",
+    published: "Спасибо! Отзыв опубликован",
+    updated: "Отзыв обновлён",
+    deleted: "Отзыв удалён",
+  },
+  gate: {
+    guestTitle: "Хотите оставить отзыв?",
+    guestText: "Войдите в аккаунт, чтобы написать отзыв.",
+    login: "Войти",
+    buyerOnly: "Чтобы оставить отзыв, нужно купить книгу.",
+    buyerOnlyHint: "Отзывы могут писать только читатели, купившие книгу, — так оценки остаются честными.",
+  },
+  errors: {
+    ALREADY_REVIEWED: "Вы уже оставили отзыв на эту книгу. Его можно изменить.",
+    REVIEW_TOO_LONG: "Отзыв слишком длинный (максимум 2000 символов).",
+    RATING_REQUIRED: "Поставьте оценку звёздами.",
+  },
+  notify: {
+    title: "Новый отзыв",
+    open: "Открыть отзывы",
+    book: "Книга",
+  },
+};
 
 export default reviews;

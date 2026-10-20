@@ -1,5 +1,42 @@
 import type { Dictionary } from "../../kk";
 
-const reviews: Dictionary["admin"]["reviews"] = {};
+const reviews: Dictionary["admin"]["reviews"] = {
+  title: "Отзывы",
+  description: "Просматривайте отзывы читателей, отвечайте и модерируйте",
+  filters: {
+    all: "Все",
+    hidden: "Скрытые",
+    low: "Низкая оценка (≤ 3)",
+    replied: "С ответом",
+    unreplied: "Без ответа",
+  },
+  total: "{count} отзыв|{count} отзыва|{count} отзывов",
+  empty: "Отзывов нет",
+  emptyHint: "По этому фильтру отзывы не найдены.",
+  hiddenBadge: "Скрыт",
+  noText: "Оценка без текста",
+  deletedBook: "Удалённая книга",
+  bookLink: "Страница книги",
+  customerLink: "Клиент",
+  hide: "Скрыть",
+  unhide: "Показать",
+  hiddenDone: "Отзыв скрыт",
+  shownDone: "Отзыв снова показан",
+  reply: "Ответить",
+  editReply: "Изменить ответ",
+  replyLabel: "Ответ магазина",
+  replyPlaceholder: "Ваш ответ читателю…",
+  replyHint: "Ответ появится под отзывом на странице книги.",
+  saveReply: "Сохранить ответ",
+  removeReply: "Удалить ответ",
+  replySaved: "Ответ сохранён",
+  replyRemoved: "Ответ удалён",
+  storeReply: "Ответ магазина · {date}",
+  delete: "Удалить",
+  deleteTitle: "Удалить отзыв?",
+  deleteText: "Отзыв будет удалён навсегда, рейтинг книги пересчитается.",
+  deleted: "Отзыв удалён",
+  edited: "изменён",
+};
 
 export default reviews;

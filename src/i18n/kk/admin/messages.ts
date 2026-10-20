@@ -1,3 +1,50 @@
-const messages = {};
+const messages = {
+  metaTitle: "Хабарламалар",
+  title: "Хабарламалар",
+  description: "Клиенттердің жеке сұрақтары: кітаптар, тапсырыстар және жалпы сұрақтар.",
+  searchPlaceholder: "Клиенттің аты немесе телефоны…",
+  searchLabel: "Хабарламаларды іздеу",
+  filters: {
+    all: "Барлығы",
+    unread: "Оқылмаған",
+  },
+  total: "{count} сөйлесу",
+  you: "Сіз:",
+  noName: "Аты жазылмаған",
+  generalSubject: "Жалпы сұрақ",
+  orderSubject: "Тапсырыс {number}",
+  empty: {
+    title: "Хабарламалар жоқ",
+    text: "Клиенттер кітап бетінен немесе жеке кабинеттен сұрақ жібергенде, олар осында көрінеді.",
+    searchTitle: "Ештеңе табылмады",
+    searchText: "Басқа атпен немесе телефон нөмірімен іздеп көріңіз.",
+    unreadTitle: "Барлық хабарламалар оқылған",
+    unreadText: "Жаңа хат келгенде осында көрсетіледі.",
+  },
+  client: {
+    title: "Клиент",
+    phone: "Телефон",
+    telegram: "Telegram",
+    telegramLinked: "Байланыстырылған",
+    telegramNone: "Байланыстырылмаған",
+    since: "Тіркелген күні",
+    orders: "Тапсырыстары",
+    profile: "Клиент профилі",
+    call: "Қоңырау шалу",
+    whatsapp: "WhatsApp",
+  },
+  context: {
+    title: "Сұрақ тақырыбы",
+    book: "Кітап",
+    order: "Тапсырыс",
+    general: "Жалпы сұрақ",
+    openBook: "Кітапты сайтта ашу",
+    editBook: "Кітапты өңдеу",
+    openOrder: "Тапсырысты ашу",
+  },
+  back: "Барлық хабарламалар",
+  replyPlaceholder: "Клиентке жауап жазыңыз…",
+  replyHint: "Жауап клиентке сайтта және Telegram арқылы жеткізіледі.",
+};
 
 export default messages;

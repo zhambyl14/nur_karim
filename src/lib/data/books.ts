@@ -100,3 +100,79 @@ export async function getBooksByIds(ids: string[]): Promise<BookCardData[]> {
   const { data } = await supabase.from("catalog_books").select(BOOK_CARD_COLUMNS).in("id", ids);
   return (data ?? []) as unknown as BookCardData[];
 }
+
+/**
+ * Related books for the book page: same genre first (most popular), then
+ * other books by the same author. Never includes the book itself.
+ */
+export async function getRelatedBooks(
+  book: Pick<CatalogBook, "id" | "genre_slug" | "author">,
+  limit = 10,
+): Promise<BookCardData[]> {
+  const [byGenre, byAuthor] = await Promise.all([
+    book.genre_slug
+      ? searchBooks({ genre: book.genre_slug, excludeId: book.id, sort: "popular", pageSize: limit })
+      : Promise.resolve({ items: [] as BookCardData[], total: 0 }),
+    book.author
+      ? searchBooks({ author: book.author, excludeId: book.id, sort: "popular", pageSize: limit })
+      : Promise.resolve({ items: [] as BookCardData[], total: 0 }),
+  ]);
+  const seen = new Set<string>();
+  const result: BookCardData[] = [];
+  for (const item of [...byGenre.items, ...byAuthor.items]) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    result.push(item);
+    if (result.length >= limit) break;
+  }
+  return result;
+}
+
+/** Whether the signed-in user has the book in favorites (false for guests). */
+export async function isFavoriteBook(userId: string | null, bookId: string): Promise<boolean> {
+  if (!userId) return false;
+  const supabase = await createSupabaseServer();
+  const { data } = await supabase
+    .from("favorites")
+    .select("book_id")
+    .eq("user_id", userId)
+    .eq("book_id", bookId)
+    .maybeSingle();
+  return !!data;
+}
+
+/** Favorite books of the signed-in user, newest first (only published books). */
+export async function getFavoriteBooks(userId: string): Promise<BookCardData[]> {
+  const supabase = await createSupabaseServer();
+  const { data, error } = await supabase
+    .from("favorites")
+    .select("book_id, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) {
+    console.error("getFavoriteBooks failed", error);
+    throw new Error("FAVORITES_LOAD_FAILED");
+  }
+  const ids = (data ?? []).map((row) => row.book_id);
+  if (ids.length === 0) return [];
+  const { data: books } = await supabase
+    .from("catalog_books")
+    .select(BOOK_CARD_COLUMNS)
+    .in("id", ids)
+    .eq("is_published", true);
+  const byId = new Map(((books ?? []) as unknown as BookCardData[]).map((b) => [b.id, b]));
+  return ids.map((id) => byId.get(id)).filter((b): b is BookCardData => !!b);
+}
+
+/** Published books for sitemap.xml */
+export async function listPublishedBookSlugs(): Promise<{ slug: string; updated_at: string }[]> {
+  const supabase = await createSupabaseServer();
+  const { data } = await supabase
+    .from("books")
+    .select("slug, updated_at")
+    .eq("is_published", true)
+    .order("updated_at", { ascending: false })
+    .limit(5000);
+  return data ?? [];
+}

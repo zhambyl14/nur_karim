@@ -1,5 +1,60 @@
 import type { Dictionary } from "../kk";
 
-const messages: Dictionary["messages"] = {};
+const messages: Dictionary["messages"] = {
+  metaTitle: "Сообщения",
+  title: "Сообщения",
+  subtitle: "Личная переписка с магазином. Сообщения видите только вы и администратор магазина.",
+  newMessage: "Новое сообщение",
+  generalSubject: "Общий вопрос",
+  orderSubject: "Заказ {number}",
+  you: "Вы:",
+  store: "Nur Karim",
+  storeTeam: "Администратор магазина",
+  unread: "{count} новое|{count} новых|{count} новых",
+  empty: {
+    title: "Сообщений пока нет",
+    text: "Если у вас есть вопрос о книге, заказе или доставке, напишите нам — мы быстро ответим.",
+  },
+  ask: {
+    button: "Вопрос продавцу",
+    title: "Вопрос продавцу",
+    about: "Книга: {title}",
+    placeholder: "Напишите свой вопрос продавцу…",
+    hint: "Ваш вопрос увидит только магазин. Ответ придёт в раздел «Сообщения» и в Telegram.",
+    send: "Отправить",
+    loginToAsk: "Войдите, чтобы задать вопрос",
+  },
+  compose: {
+    title: "Новое сообщение",
+    description: "Общий вопрос — о книгах, доставке, оплате или на другую тему.",
+    label: "Сообщение",
+  },
+  chat: {
+    back: "Все сообщения",
+    placeholder: "Напишите сообщение…",
+    send: "Отправить",
+    sending: "Отправляется…",
+    failed: "Не отправлено",
+    retry: "Повторить",
+    hint: "Enter — отправить, Shift+Enter — новая строка",
+    today: "Сегодня",
+    yesterday: "Вчера",
+    aboutBook: "О книге",
+    aboutOrder: "О заказе",
+    openBook: "Открыть книгу",
+    openOrder: "Открыть заказ",
+    noMessages: "Переписка ещё не началась.",
+    live: "Новые сообщения появляются автоматически",
+    messageList: "Переписка",
+    tooLong: "Сообщение слишком длинное (не более 4000 символов).",
+    loadError: "Не удалось загрузить сообщения.",
+  },
+  telegram: {
+    toAdmin: "💬 <b>Новое сообщение</b>\n{name} · {subject}\n\n{text}",
+    toAdminButton: "Ответить",
+    toClient: "💬 <b>Ответ от магазина Nur Karim</b>\n{subject}\n\n{text}",
+    toClientButton: "Открыть переписку",
+  },
+};
 
 export default messages;

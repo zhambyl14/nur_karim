@@ -1,5 +1,81 @@
 import type { Dictionary } from "../kk";
 
-const book: Dictionary["book"] = {};
+const book: Dictionary["book"] = {
+  catalogNo: "№ {no}",
+  backToCatalog: "Вернуться в каталог",
+  breadcrumb: "Навигация",
+  byAuthor: "Автор",
+  pagesCount: "{count} страница|{count} страницы|{count} страниц",
+  noRating: "Пока без оценок",
+  ratingLabel: "Рейтинг {value} из 5",
+  reviewsLink: "{count} отзыв|{count} отзыва|{count} отзывов",
+  format: {
+    label: "Выберите формат",
+    paper: "Бумажная",
+    ebook: "Электронная",
+    unavailable: "Недоступно",
+    soldOut: "Нет в наличии",
+  },
+  price: "Цена",
+  priceSaving: "Экономия: {amount}",
+  addToCart: "В корзину",
+  unavailableTitle: "Сейчас нет в продаже",
+  unavailableText: "Книга появится в продаже, когда поступит на склад. Уточнить можно, задав вопрос продавцу.",
+  stock: "На складе: {count}",
+  stockLow: "Осталось {count} шт.",
+  outOfStock: "Нет в наличии",
+  ebookInstant: "Читайте сразу после подтверждения оплаты",
+  ebookPages: "Электронная версия · {count} стр.",
+  preview: "Читать отрывок",
+  previewHint: "Первые {count} стр. бесплатно",
+  share: "Поделиться",
+  shareText: "{title} — в книжном магазине Nur Karim",
+  linkCopied: "Ссылка скопирована",
+  favorite: {
+    add: "Добавить в избранное",
+    remove: "Убрать из избранного",
+    added: "Добавлено в избранное",
+    removed: "Удалено из избранного",
+    login: "Войдите, чтобы добавлять книги в избранное",
+  },
+  coverTypes: {
+    hard: "Твёрдая обложка",
+    soft: "Мягкая обложка",
+  },
+  about: "О книге",
+  noDescription: "Описание скоро появится.",
+  readMore: "Читать полностью",
+  readLess: "Свернуть",
+  details: {
+    title: "Характеристики",
+    catalogNo: "Номер в каталоге",
+    genre: "Категория",
+    author: "Автор",
+    publisher: "Издательство",
+    year: "Год издания",
+    pages: "Количество страниц",
+    isbn: "ISBN",
+    coverType: "Обложка",
+    language: "Язык",
+    formats: "Форматы",
+  },
+  gallery: {
+    label: "Фотографии книги",
+    show: "Показать фото {index}",
+    image: "{title} — фото {index}",
+  },
+  perks: {
+    delivery: "Курьер по Астане {astana}, Казпочта {kazpost}",
+    gift: "Можно отправить другу в подарок",
+    secure: "Оплата переводом на номер магазина, подтверждает администратор",
+  },
+  related: {
+    title: "Похожие книги",
+    byAuthor: "Другие книги автора",
+  },
+  meta: {
+    description: "{title} — {author}. {price}. Купите в книжном магазине Nur Karim: курьер по Астане, доставка по Казахстану.",
+  },
+};
 
 export default book;
