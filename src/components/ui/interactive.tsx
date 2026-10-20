@@ -5,7 +5,6 @@ import { Check, Copy, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { create } from "zustand";
 import { cn } from "@/lib/utils";
-import { formatPhoneInput } from "@/lib/phone";
 import { useI18n } from "@/lib/i18n/client";
 import { Button } from "./button";
 import { Input, type InputProps } from "./field";
@@ -198,29 +197,57 @@ export function CopyButton({
 /* ---------------------------------------------------------------------------
    Phone input: formats as +7 747 400 53 47 while typing
    --------------------------------------------------------------------------- */
+/**
+ * Kazakhstan phone field: a fixed, non-removable "+7" prefix and up to 10
+ * digits after it. Pasting a full number in any common form (8 771…, +7 771…,
+ * 7771…, 771…) keeps the right 10 digits. The value passed to onChange is
+ * "+7 771 494 02 78" (or "" when empty), which normalizePhone understands.
+ */
 export function PhoneInput({
   value,
   onChange,
+  className,
   ...props
-}: Omit<InputProps, "value" | "onChange" | "type"> & {
+}: Omit<InputProps, "value" | "onChange" | "type" | "leftSlot"> & {
   value: string;
   onChange: (value: string) => void;
 }) {
   return (
     <Input
       type="tel"
-      inputMode="tel"
-      autoComplete="tel"
-      placeholder="+7 700 000 00 00"
-      value={value}
-      onChange={(e) => onChange(e.target.value === "" ? "" : formatPhoneInput(e.target.value))}
-      onFocus={(e) => {
-        if (!value) onChange("+7 ");
-        props.onFocus?.(e);
+      inputMode="numeric"
+      autoComplete="tel-national"
+      placeholder="700 000 00 00"
+      leftSlot={<span className="text-[15px] font-semibold text-ink">+7</span>}
+      className={cn("pl-11 tracking-wide", className)}
+      value={phoneNational(value)}
+      onChange={(e) => {
+        const national = phoneNational(e.target.value, phoneNational(value));
+        onChange(national ? `+7 ${national}` : "");
       }}
       {...props}
     />
   );
+}
+
+/**
+ * The 10 national digits of a phone, grouped "771 494 02 78".
+ * With `previous` the input is raw text typed or pasted into the field.
+ */
+function phoneNational(input: string, previous?: string): string {
+  let d = (input ?? "").replace(/\D/g, "");
+  if (previous === undefined) {
+    // stored form "+7 771 …" or "8771…": drop the country code
+    if (/^\s*\+7/.test(input ?? "") || (d.length > 10 && (d.startsWith("7") || d.startsWith("8")))) d = d.slice(1);
+  } else if (d.length > 10) {
+    const prev = previous.replace(/\D/g, "");
+    if (prev.length === 10 && d.startsWith(prev)) d = prev; // already full: ignore extra digits
+    else if (d.length === 11 && (d.startsWith("7") || d.startsWith("8"))) d = d.slice(1); // 8771… / 7771… / +7771…
+  }
+  // Kazakh numbers after +7 start with 7; a leading 8 is the habitual "8 771…" prefix.
+  if (previous !== undefined && d.startsWith("8")) d = d.slice(1);
+  d = d.slice(0, 10);
+  return [d.slice(0, 3), d.slice(3, 6), d.slice(6, 8), d.slice(8, 10)].filter(Boolean).join(" ");
 }
 
 /* ---------------------------------------------------------------------------
