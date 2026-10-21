@@ -45,17 +45,20 @@ export function BookCard({
       )}
     >
       <Link href={`/books/${book.slug}`} className="absolute inset-0 z-0 rounded-2xl" aria-label={book.title} />
-      <BookCover
-        title={book.title}
-        author={book.author}
-        coverUrl={book.cover_url}
-        palette={book.cover_palette}
-        size={compact ? "sm" : "md"}
-        ebookBadge={book.ebook_available ? t("common.format.ebookBadge") : null}
-        discountPct={book.discount_pct}
-        priority={priority}
-      />
-      <div className={cn("flex flex-col gap-1", compact ? "px-0.5" : "px-1")}>
+      {/* Cover and texts let clicks through to the card link underneath */}
+      <div className="pointer-events-none">
+        <BookCover
+          title={book.title}
+          author={book.author}
+          coverUrl={book.cover_url}
+          palette={book.cover_palette}
+          size={compact ? "sm" : "md"}
+          ebookBadge={book.ebook_available ? t("common.format.ebookBadge") : null}
+          discountPct={book.discount_pct}
+          priority={priority}
+        />
+      </div>
+      <div className={cn("pointer-events-none flex flex-col gap-1", compact ? "px-0.5" : "px-1")}>
         {!compact && (
           <div className="truncate text-[11px] font-semibold text-faint">
             № {book.catalog_no}

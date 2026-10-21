@@ -57,13 +57,13 @@ export function CartLineRow({
     >
       <div className="flex items-center gap-3 sm:gap-4">
         <div className={cn("w-[58px] shrink-0 sm:w-[66px]", unavailable && "opacity-50 grayscale")}>
-          <BookCover
-            title={info?.title ?? "—"}
-            author={info?.author}
-            coverUrl={info?.cover_url}
-            palette={info?.cover_palette ?? 0}
-            size="xs"
-          />
+          {info?.slug ? (
+            <Link href={`/books/${info.slug}`} tabIndex={-1} aria-hidden>
+              <BookCover title={info.title} author={info.author} coverUrl={info.cover_url} palette={info.cover_palette ?? 0} size="xs" />
+            </Link>
+          ) : (
+            <BookCover title={info?.title ?? "—"} author={info?.author} coverUrl={info?.cover_url} palette={info?.cover_palette ?? 0} size="xs" />
+          )}
         </div>
         <div className="min-w-0 flex-1">
           {info?.slug ? (
