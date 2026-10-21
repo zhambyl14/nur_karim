@@ -103,7 +103,7 @@ export function BookFilters({ filters, genres }: { filters: BookFilterState; gen
             <option value="draft">{t("admin.books.filters.draft")}</option>
           </Select>
         </Field>
-        <Field label={label(t("admin.books.filters.sort"))} className={wrap}>
+        <Field label={label(t("admin.books.filters.sort"))} className={layout === "inline" ? "w-[13.5rem] shrink-0" : ""}>
           <Select
             aria-label={t("admin.books.filters.sort")}
             value={filters.sort}

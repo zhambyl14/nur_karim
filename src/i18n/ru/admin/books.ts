@@ -59,7 +59,7 @@ const books: Dictionary["admin"]["books"] = {
     sorts: {
       new: "Сначала новые",
       title: "По названию",
-      stock: "Сначала с малым остатком",
+      stock: "Мало на складе",
       sold: "Сначала продаваемые",
     },
     open: "Фильтры",

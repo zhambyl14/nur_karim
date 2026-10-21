@@ -129,7 +129,7 @@ export async function DashboardView({ range, counters }: { range: DashboardRange
           {cities.length === 0 ? (
             <NoData />
           ) : (
-            <div className="grid gap-6 xl:grid-cols-2">
+            <div className="grid gap-6 2xl:grid-cols-2">
               <CityChart data={cities.slice(0, 8)} />
               <CityTable rows={cities} />
             </div>

@@ -5,7 +5,7 @@ import { coverPalette } from "@/lib/constants";
 type CoverSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 const TYPO: Record<CoverSize, { pad: string; inset: string; label: string; title: string; author: string }> = {
-  xs: { pad: "p-[7px]", inset: "inset-[4px]", label: "hidden", title: "text-[9px] leading-[1.15]", author: "hidden" },
+  xs: { pad: "p-[7px]", inset: "inset-[4px]", label: "hidden", title: "text-[clamp(5px,11cqw,9px)] leading-[1.15]", author: "hidden" },
   sm: { pad: "px-3 py-3.5", inset: "inset-[6px]", label: "text-[7px]", title: "text-[clamp(11px,10cqw,15px)] leading-[1.18]", author: "text-[9px]" },
   md: { pad: "px-4 py-[18px]", inset: "inset-2", label: "text-[8px]", title: "text-[clamp(13px,10cqw,19px)] leading-[1.18]", author: "text-[10px]" },
   lg: { pad: "px-[22px] py-[26px]", inset: "inset-[10px]", label: "text-[9px]", title: "text-[clamp(17px,10.5cqw,26px)] leading-[1.12]", author: "text-[11px]" },
