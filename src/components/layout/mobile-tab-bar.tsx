@@ -2,28 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BookOpen, House, LayoutGrid, ShoppingBag } from "lucide-react";
 import { useI18n } from "@/lib/i18n/client";
 import { useCartBadge } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
-
-/* Geometric icons drawn exactly like the design mockup */
-function HomeIcon({ active }: { active: boolean }) {
-  return (
-    <span
-      className={cn("size-[10px] rotate-45", active ? "bg-wine-ink" : "border-2 border-faint")}
-      style={{ boxSizing: "border-box" }}
-    />
-  );
-}
-function CatalogIcon({ active }: { active: boolean }) {
-  return <span className={cn("size-[11px] rounded-[2px]", active ? "bg-wine-ink" : "border-2 border-faint")} />;
-}
-function BooksIcon({ active }: { active: boolean }) {
-  return <span className={cn("h-3 w-[9px] rounded-[1px_3px_3px_1px]", active ? "bg-wine-ink" : "border-2 border-faint")} />;
-}
-function CartIcon({ active }: { active: boolean }) {
-  return <span className={cn("h-[11px] w-3 rounded-[2px_2px_4px_4px]", active ? "bg-wine-ink" : "border-2 border-faint")} />;
-}
 
 /** Bottom tab bar for phones (Басты · Каталог · Кітаптарым · Себет) */
 export function MobileTabBar() {
@@ -32,44 +14,51 @@ export function MobileTabBar() {
   const cartCount = useCartBadge();
 
   const tabs = [
-    { href: "/", label: t("nav.home"), Icon: HomeIcon, active: pathname === "/" },
+    { href: "/", label: t("nav.home"), Icon: House, active: pathname === "/" },
     {
       href: "/catalog",
       label: t("nav.catalog"),
-      Icon: CatalogIcon,
+      Icon: LayoutGrid,
       active: pathname.startsWith("/catalog") || pathname.startsWith("/books") || pathname.startsWith("/authors"),
     },
-    { href: "/account/library", label: t("nav.myBooksShort"), Icon: BooksIcon, active: pathname.startsWith("/account") },
-    { href: "/cart", label: t("nav.cart"), Icon: CartIcon, active: pathname === "/cart" || pathname === "/checkout", badge: cartCount },
+    { href: "/account/library", label: t("nav.myBooksShort"), Icon: BookOpen, active: pathname.startsWith("/account") },
+    { href: "/cart", label: t("nav.cart"), Icon: ShoppingBag, active: pathname === "/cart" || pathname === "/checkout", badge: cartCount },
   ];
 
   return (
     <nav
       aria-label={t("common.a11y.menu")}
-      className="nk-no-print fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-line bg-card/95 px-3.5 pt-2.5 backdrop-blur-md md:hidden"
-      style={{ paddingBottom: "max(14px, env(safe-area-inset-bottom))" }}
+      className="nk-no-print fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/95 shadow-[0_-8px_24px_rgb(var(--nk-shadow-color)/.08)] backdrop-blur-md md:hidden"
+      style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
     >
-      {tabs.map(({ href, label, Icon, active, badge }) => (
-        <Link
-          key={href}
-          href={href}
-          aria-current={active ? "page" : undefined}
-          className={cn(
-            "relative flex flex-col items-center gap-[5px] text-[10.5px]",
-            active ? "font-bold text-wine-ink" : "font-semibold text-faint",
-          )}
-        >
-          <span className="grid h-3.5 place-items-center">
-            <Icon active={active} />
-          </span>
-          {label}
-          {!!badge && (
-            <span className="absolute -top-1.5 left-1/2 ml-2 grid h-4 min-w-4 place-items-center rounded-full bg-wine px-1 text-[9px] font-extrabold leading-none text-white">
-              {badge > 99 ? "99+" : badge}
+      <div className="grid grid-cols-4 px-2 pt-1.5">
+        {tabs.map(({ href, label, Icon, active, badge }) => (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "relative flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-xl text-[11px] leading-none transition active:scale-95",
+              active ? "font-bold text-wine-ink" : "font-semibold text-muted",
+            )}
+          >
+            <span
+              className={cn(
+                "relative grid h-7 w-12 place-items-center rounded-full transition-colors",
+                active && "bg-wine-soft",
+              )}
+            >
+              <Icon className="size-[19px]" strokeWidth={active ? 2.2 : 1.8} aria-hidden />
+              {!!badge && (
+                <span className="absolute -top-1 left-[calc(50%+4px)] grid h-[18px] min-w-[18px] place-items-center rounded-full bg-wine px-1 text-[10px] font-extrabold leading-none text-white ring-2 ring-card">
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
             </span>
-          )}
-        </Link>
-      ))}
+            <span className="max-w-full truncate px-0.5">{label}</span>
+          </Link>
+        ))}
+      </div>
     </nav>
   );
 }

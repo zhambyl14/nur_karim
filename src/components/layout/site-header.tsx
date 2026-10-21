@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, ShoppingBag } from "lucide-react";
 import { useI18n } from "@/lib/i18n/client";
 import { useCartBadge } from "@/lib/hooks";
 import { useSession } from "@/components/session";
@@ -33,21 +33,25 @@ export function SiteHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-navy text-white">
+    <header className="sticky top-0 z-50 bg-navy text-white shadow-[0_1px_0_rgba(255,255,255,.06)]">
       <div className="nk-container flex h-[68px] items-center gap-3 md:h-[76px] md:gap-5 lg:gap-8">
         <Logo tone="light" size="md" />
 
-        <nav className="hidden items-center gap-6 lg:flex" aria-label={t("common.a11y.menu")}>
+        <nav className="hidden h-full items-center gap-1 lg:flex xl:gap-2" aria-label={t("common.a11y.menu")}>
           {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
+              aria-current={item.active ? "page" : undefined}
               className={cn(
-                "text-sm font-semibold transition hover:text-white",
+                "relative flex h-10 items-center rounded-full px-3 text-sm font-semibold transition hover:bg-white/[0.06] hover:text-white",
                 item.active ? "text-white" : "text-white/70",
               )}
             >
               {item.label}
+              {item.active && (
+                <span className="absolute -bottom-[9px] left-1/2 size-[7px] -translate-x-1/2 rotate-45 bg-gold" aria-hidden />
+              )}
             </Link>
           ))}
         </nav>
@@ -83,8 +87,9 @@ export function SiteHeader() {
           )}
           <Link
             href="/cart"
-            className="hidden h-10 items-center gap-2 rounded-full bg-wine px-[18px] text-[13px] font-bold transition hover:bg-wine-hover md:inline-flex"
+            className="hidden h-10 items-center gap-2 rounded-full bg-wine pl-4 pr-2 text-[13px] font-bold shadow-[0_6px_16px_rgba(125,26,53,.35)] transition hover:bg-wine-hover md:inline-flex"
           >
+            <ShoppingBag className="size-4" aria-hidden />
             {t("nav.cart")}
             <span className="grid h-5 min-w-5 place-items-center rounded-full bg-white px-1 text-[11px] font-extrabold text-[#7d1a35]">
               {cartCount}
@@ -93,6 +98,7 @@ export function SiteHeader() {
           <UserMenu />
         </div>
       </div>
+      <div className="nk-hairline-gold opacity-30" aria-hidden />
       <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );

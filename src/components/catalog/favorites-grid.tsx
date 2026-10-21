@@ -20,7 +20,7 @@ export function FavoritesGrid({ books }: { books: BookCardData[] }) {
           {/* mirrors the cover box (card padding 12px + 1px border, 3:4) so the heart sits in its bottom-right corner,
               clear of the «E-кітап» and discount badges at the top */}
           <div
-            className="pointer-events-none absolute inset-x-[13px] top-[13px] z-20 aspect-[3/4] transition duration-200 group-hover/fav:-translate-y-1"
+            className="pointer-events-none absolute inset-x-[13px] top-[13px] z-20 aspect-[3/4] transition duration-200 group-hover/fav:-translate-y-1.5 motion-reduce:transition-none motion-reduce:group-hover/fav:translate-y-0"
           >
             <FavoriteButton
               bookId={book.id}

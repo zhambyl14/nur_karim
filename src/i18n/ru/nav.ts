@@ -32,6 +32,12 @@ const nav: Dictionary["nav"] = {
     gifts: "Подари другу",
     rights: "© {year} Nur Karim. Все права защищены.",
     description: "Магазин религиозных, исторических и познавательных книг. Курьер по Астане, Казпочта по Казахстану.",
+    helpTitle: "Нужна помощь с выбором книги?",
+    helpText: "Напишите нам — ответим и подскажем книгу.",
+    whatsapp: "Написать в WhatsApp",
+    social: "Соцсети",
+    paymentNote: "Оплата: перевод {bank}",
+    deliveryNote: "Астана {astana} · Казпочта {kazpost}",
   },
 };
 

@@ -35,7 +35,7 @@ export async function CatalogSearch({ params, className }: { params: CatalogPara
         maxLength={100}
         enterKeyHint="search"
         placeholder={t("catalog.searchPlaceholder")}
-        className="h-[50px] w-full rounded-[13px] border border-line bg-card pl-11 pr-24 text-sm font-medium text-ink placeholder:text-faint transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 [&::-webkit-search-cancel-button]:hidden"
+        className="h-[50px] w-full rounded-[14px] border border-line bg-card pl-11 pr-24 shadow-card hover:border-line-strong text-sm font-medium text-ink placeholder:text-faint transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 [&::-webkit-search-cancel-button]:hidden"
       />
       <div className="absolute inset-y-0 right-1.5 flex items-center gap-1">
         {params.q && (
@@ -43,14 +43,14 @@ export async function CatalogSearch({ params, className }: { params: CatalogPara
             href={catalogHref(params, { q: undefined })}
             scroll={false}
             aria-label={t("catalog.searchClear")}
-            className="grid size-9 place-items-center rounded-full text-muted transition hover:bg-subtle hover:text-ink"
+            className="grid size-10 place-items-center rounded-full text-muted transition hover:bg-subtle hover:text-ink"
           >
             <X className="size-4" />
           </Link>
         )}
         <button
           type="submit"
-          className="h-[38px] rounded-[10px] bg-primary px-3.5 text-[13px] font-bold text-on-primary transition hover:bg-primary-hover"
+          className="h-[40px] rounded-[11px] bg-primary px-4 text-[13px] font-bold text-on-primary transition hover:bg-primary-hover active:scale-[.97] motion-reduce:active:scale-100"
         >
           {t("common.actions.search")}
         </button>

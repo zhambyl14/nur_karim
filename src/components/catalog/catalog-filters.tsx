@@ -45,18 +45,18 @@ function FilterFields({
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col divide-y divide-line-soft [&>*]:py-5 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
       <fieldset>
-        <legend className="mb-2.5 text-xs font-bold uppercase tracking-[.08em] text-muted">{t("catalog.filters.format")}</legend>
-        <div className="flex flex-col gap-1.5">
+        <legend className="float-left mb-3 w-full text-[11px] font-bold uppercase tracking-[.12em] text-muted">{t("catalog.filters.format")}</legend>
+        <div className="clear-both flex flex-col gap-1.5">
           {formats.map((f) => {
             const checked = value.format === f.value;
             return (
               <label
                 key={f.value ?? "all"}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition",
-                  checked ? "border-primary bg-card text-ink ring-2 ring-primary/10" : "border-line bg-card text-ink-2 hover:border-line-strong",
+                  "flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-gold",
+                  checked ? "border-wine-line bg-wine-soft text-ink" : "border-line bg-card text-ink-2 hover:border-line-strong hover:bg-card-2",
                 )}
               >
                 <input
@@ -68,7 +68,7 @@ function FilterFields({
                 />
                 <span
                   aria-hidden
-                  className={cn("grid size-[18px] place-items-center rounded-full border-2", checked ? "border-wine" : "border-line-strong")}
+                  className={cn("grid size-[18px] shrink-0 place-items-center rounded-full border-2 bg-card transition", checked ? "border-wine" : "border-line-strong")}
                 >
                   {checked && <span className="size-2 rounded-full bg-wine" />}
                 </span>
@@ -80,8 +80,8 @@ function FilterFields({
       </fieldset>
 
       <fieldset>
-        <legend className="mb-2.5 text-xs font-bold uppercase tracking-[.08em] text-muted">{t("catalog.filters.price")}</legend>
-        <form onSubmit={onPriceSubmit} className="flex flex-col gap-2.5">
+        <legend className="float-left mb-3 w-full text-[11px] font-bold uppercase tracking-[.12em] text-muted">{t("catalog.filters.price")}</legend>
+        <form onSubmit={onPriceSubmit} className="clear-both flex flex-col gap-2.5">
           <div className="grid grid-cols-2 gap-2">
             <Input
               inputMode="numeric"
@@ -111,7 +111,7 @@ function FilterFields({
       </fieldset>
 
       <div>
-        <label htmlFor={`${id}-lang`} className="mb-2.5 block text-xs font-bold uppercase tracking-[.08em] text-muted">
+        <label htmlFor={`${id}-lang`} className="mb-3 block text-[11px] font-bold uppercase tracking-[.12em] text-muted">
           {t("catalog.filters.language")}
         </label>
         <Select
@@ -130,8 +130,8 @@ function FilterFields({
       </div>
 
       <fieldset>
-        <legend className="mb-2.5 text-xs font-bold uppercase tracking-[.08em] text-muted">{t("catalog.filters.availability")}</legend>
-        <div className="flex flex-col gap-3">
+        <legend className="float-left mb-3 w-full text-[11px] font-bold uppercase tracking-[.12em] text-muted">{t("catalog.filters.availability")}</legend>
+        <div className="clear-both flex flex-col gap-3">
           <Checkbox
             label={t("catalog.filters.sale")}
             checked={!!value.sale}
@@ -146,7 +146,7 @@ function FilterFields({
       </fieldset>
 
       <div>
-        <div className="mb-2.5 text-xs font-bold uppercase tracking-[.08em] text-muted">{t("catalog.filters.author")}</div>
+        <div className="mb-3 text-[11px] font-bold uppercase tracking-[.12em] text-muted">{t("catalog.filters.author")}</div>
         {value.author ? (
           <div className="flex items-center justify-between gap-2 rounded-xl border border-line bg-card px-3.5 py-2.5">
             <span className="min-w-0 truncate text-sm font-semibold text-ink">{value.author}</span>
@@ -194,18 +194,20 @@ export function DesktopFilters({ params }: { params: CatalogParams }) {
     <aside
       aria-label={t("catalog.filters.title")}
       aria-busy={pending || undefined}
-      className={cn("sticky top-[96px] rounded-[18px] border border-line bg-card p-5 transition", pending && "opacity-70")}
+      className={cn("sticky top-[96px] rounded-[22px] border border-line bg-card p-5 shadow-card transition", pending && "opacity-70")}
     >
-      <div className="mb-5 flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 text-base font-bold text-ink">
-          <SlidersHorizontal className="size-4 text-muted" aria-hidden />
+      <div className="mb-5 flex items-center justify-between gap-2 border-b border-line-soft pb-4">
+        <h2 className="flex items-center gap-2.5 font-serif text-lg font-semibold text-ink">
+          <span className="grid size-8 place-items-center rounded-[10px] bg-wine-soft text-wine-ink" aria-hidden>
+            <SlidersHorizontal className="size-4" />
+          </span>
           {t("catalog.filters.title")}
         </h2>
         {active > 0 && (
           <Link
             href={catalogHref({ q: params.q, genre: params.genre, sort: params.sort })}
             scroll={false}
-            className="text-xs font-bold text-wine-ink hover:underline"
+            className="rounded-md px-1.5 py-1 text-xs font-bold text-wine-ink hover:underline"
           >
             {t("catalog.filters.reset")}
           </Link>
@@ -247,7 +249,7 @@ export function MobileFilters({ params, className }: { params: CatalogParams; cl
         onClick={openSheet}
         loading={pending}
         leftIcon={<SlidersHorizontal className="size-4" />}
-        className={cn("h-[50px] rounded-[13px] px-4", className)}
+        className={cn("h-[50px] rounded-[14px] bg-card px-4 shadow-card", className)}
         aria-haspopup="dialog"
       >
         {t("catalog.filters.open")}

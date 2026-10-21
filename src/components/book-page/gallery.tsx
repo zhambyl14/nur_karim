@@ -38,7 +38,22 @@ export function BookGallery({
 
   return (
     <div className={className}>
-      <div className="shadow-[0_24px_50px_rgb(var(--nk-shadow-color)/.28)]">
+      <div className="relative">
+        {/* soft floor shadow + glow so the cover feels like an object on a shelf */}
+        <span
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute -bottom-5 left-[8%] right-[8%] h-8 rounded-[50%] blur-xl",
+            tone === "navy" ? "bg-black/60" : "bg-[rgb(var(--nk-shadow-color)/.35)]",
+          )}
+        />
+        {tone === "navy" && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -inset-10 rounded-full bg-[radial-gradient(closest-side,rgba(200,163,90,.22),transparent)]"
+          />
+        )}
+        <div className="relative shadow-[0_2px_4px_rgb(var(--nk-shadow-color)/.12),0_22px_44px_-12px_rgb(var(--nk-shadow-color)/.45)] rounded-[4px_9px_9px_4px]">
         {active === 0 ? (
           <BookCover
             title={title}
@@ -64,10 +79,11 @@ export function BookGallery({
             )}
           </div>
         )}
+        </div>
       </div>
 
       {slides.length > 1 && (
-        <ul className="mt-4 flex flex-wrap justify-center gap-2" aria-label={t("book.gallery.label")}>
+        <ul className="mt-6 flex flex-wrap justify-center gap-2" aria-label={t("book.gallery.label")}>
           {slides.map((src, index) => (
             <li key={`${src ?? "cover"}-${index}`}>
               <button

@@ -4,6 +4,7 @@ import { BookCard } from "@/components/book/book-card";
 import { SectionTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { BookCardData } from "@/types/app";
+import { Eyebrow } from "./ornament";
 
 /**
  * Home section: Lora title + «Барлығын көру».
@@ -13,6 +14,7 @@ import type { BookCardData } from "@/types/app";
 export function BookShelf({
   id,
   title,
+  eyebrow,
   meta,
   href,
   linkLabel,
@@ -21,6 +23,8 @@ export function BookShelf({
 }: {
   id: string;
   title: string;
+  /** small uppercase label above the title (gold hairline) */
+  eyebrow?: string;
   meta?: string;
   href: string;
   linkLabel: string;
@@ -34,13 +38,14 @@ export function BookShelf({
   const [smMax, lgMax, xlMax] = [fullRows(3, 6), fullRows(4, 8), fullRows(5, 10)];
   return (
     <section aria-labelledby={id} className="nk-container">
+      {eyebrow && <Eyebrow className="mb-2.5">{eyebrow}</Eyebrow>}
       <SectionTitle
         title={<span id={id}>{title}</span>}
         meta={meta}
         action={
           <Link
             href={href}
-            className="inline-flex items-center gap-1.5 text-[13px] font-bold text-wine-ink transition hover:gap-2.5 sm:text-sm"
+            className="-my-2 inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-wine-ink transition hover:gap-2.5 sm:text-sm"
           >
             {linkLabel}
             <ArrowRight className="size-4" aria-hidden />
@@ -52,7 +57,7 @@ export function BookShelf({
           <li
             key={book.id}
             className={cn(
-              "w-[46%] max-w-[200px] shrink-0 snap-start sm:w-auto sm:max-w-none",
+              "w-[44%] max-w-[200px] shrink-0 snap-start sm:w-auto sm:max-w-none",
               i < smMax ? "sm:block" : "sm:hidden",
               i < lgMax ? "lg:block" : "lg:hidden",
               i < xlMax ? "xl:block" : "xl:hidden",

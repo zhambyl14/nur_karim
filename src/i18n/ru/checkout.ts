@@ -25,6 +25,8 @@ const checkout: Dictionary["checkout"] = {
     summary: "Ваш заказ",
   },
   contact: {
+    fromAccount: "Заказчик:",
+    change: "Изменить",
     name: "Ваше имя и фамилия",
     phone: "Ваш номер телефона",
     hint: "Уведомления о заказе придут на этот номер и в Telegram.",
@@ -34,6 +36,7 @@ const checkout: Dictionary["checkout"] = {
     },
   },
   delivery: {
+    recipientIsYou: "Посылку получит {name} — имя и номер берутся из аккаунта.",
     astana: "Курьер по Астане",
     astanaHint: "До двери за 1–2 дня",
     kazpost: "Казпочта по Казахстану",

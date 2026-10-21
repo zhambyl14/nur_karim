@@ -32,21 +32,21 @@ export function GenreChips({
 }) {
   return (
     <nav aria-label={ariaLabel} className={cn("-mx-4 sm:mx-0", className)}>
-      <ul className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-1 sm:flex-wrap sm:overflow-visible sm:px-0">
-        <li>
+      <ul className="no-scrollbar nk-fade-x flex snap-x scroll-px-4 gap-2 overflow-x-auto overscroll-x-contain px-4 py-1 sm:flex-wrap sm:overflow-visible sm:px-0 sm:[-webkit-mask-image:none] sm:[mask-image:none]">
+        <li className="snap-start">
           <ChipLink href={allHref} active={allActive}>
             {allLabel}
           </ChipLink>
         </li>
         {genres.map((genre) => (
-          <li key={genre.id}>
+          <li key={genre.id} className="snap-start">
             <ChipLink href={hrefFor(genre.slug)} active={activeSlug === genre.slug}>
               {locale === "ru" ? genre.name_ru : genre.name_kk}
             </ChipLink>
           </li>
         ))}
         {ebook && (
-          <li>
+          <li className="snap-start">
             <ChipLink href={ebook.href} accent active={ebook.active}>
               {ebook.label}
             </ChipLink>

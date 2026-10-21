@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { BookMarked, CalendarDays, ChevronRight, FileText, Languages, MessageSquareText } from "lucide-react";
 import { getBookBySlug, getRelatedBooks, isFavoriteBook } from "@/lib/data/books";
 import { getSettings } from "@/lib/data/common";
 import { getSessionUserId } from "@/lib/auth";
@@ -17,11 +17,19 @@ import { PurchasePanel } from "@/components/book-page/purchase-panel";
 import { BookDescription } from "@/components/book-page/description";
 import { ShareButton } from "@/components/book-page/share-button";
 import { BackButton } from "@/components/book-page/back-button";
+import { OrnamentRule, SectionHeading } from "@/components/book-page/ornament";
 import { BookShelf } from "@/components/home/book-shelf";
 import { ReviewsSection } from "@/components/reviews/reviews-section";
 import type { CatalogBook } from "@/types/app";
 
 type Props = { params: Promise<{ slug: string }> };
+
+const FACT_COLS: Record<number, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+  4: "grid-cols-2 sm:grid-cols-4",
+};
 
 function languageLabel(code: string, locale: "kk" | "ru"): string {
   return code in BOOK_LANGUAGE_LABELS ? BOOK_LANGUAGE_LABELS[code as BookLanguage][locale] : code;
@@ -122,6 +130,16 @@ export default async function BookPage({ params }: Props) {
   ];
   const details = detailRows.filter((row): row is DetailRow => row !== null);
 
+  type Fact = { icon: typeof FileText; label: string; value: string };
+  const facts = [
+    book.pages ? { icon: FileText, label: t("book.details.pages"), value: String(book.pages) } : null,
+    book.language ? { icon: Languages, label: t("book.details.language"), value: languageLabel(book.language, locale) } : null,
+    book.cover_type === "hard" || book.cover_type === "soft"
+      ? { icon: BookMarked, label: t("book.details.coverType"), value: t(`book.coverTypes.${book.cover_type}`) }
+      : null,
+    book.publish_year ? { icon: CalendarDays, label: t("book.details.year"), value: String(book.publish_year) } : null,
+  ].filter((f): f is Fact => f !== null);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Book",
@@ -180,7 +198,7 @@ export default async function BookPage({ params }: Props) {
       />
 
       {/* phone: navy header with the cover (design 1c) */}
-      <div className="nk-hero-bg md:hidden">
+      <div className="nk-hero-bg nk-book-girih overflow-hidden [--nk-book-girih-color:#fff] [--nk-book-girih-opacity:.05] md:hidden">
         <div className="nk-container flex items-center justify-between pt-4">
           <BackButton />
           <div className="flex gap-2">
@@ -189,7 +207,7 @@ export default async function BookPage({ params }: Props) {
           </div>
         </div>
         <BookGallery
-          className="mx-auto w-[min(58vw,240px)] pb-12 pt-5"
+          className="mx-auto w-[min(56vw,232px)] pb-14 pt-6"
           tone="navy"
           title={book.title}
           author={book.author}
@@ -202,7 +220,8 @@ export default async function BookPage({ params }: Props) {
       </div>
 
       <div className="relative -mt-7 rounded-t-[28px] bg-page md:mt-0 md:rounded-none">
-        <div className="nk-container pt-6 md:pt-8 lg:pt-10">
+        <span aria-hidden className="absolute left-1/2 top-2.5 h-1 w-10 -translate-x-1/2 rounded-full bg-line-strong md:hidden" />
+        <div className="nk-container pt-7 md:pt-8 lg:pt-10">
           <nav aria-label={t("book.breadcrumb")} className="mb-6 hidden md:block">
             <ol className="flex flex-wrap items-center gap-1.5 text-[13px] font-semibold text-muted">
               <li>
@@ -227,43 +246,57 @@ export default async function BookPage({ params }: Props) {
             </ol>
           </nav>
 
-          <div className="grid gap-y-7 [grid-template-areas:'info'_'buy'_'about'] md:grid-cols-[250px_minmax(0,1fr)] md:gap-x-8 md:[grid-template-areas:'cover_info'_'cover_buy'_'cover_about'] lg:grid-cols-[300px_minmax(0,1fr)_340px] lg:gap-x-10 lg:[grid-template-areas:'cover_info_buy'_'cover_about_buy'] xl:grid-cols-[340px_minmax(0,1fr)_360px]">
+          <div className="grid gap-y-8 [grid-template-areas:'info'_'buy'_'about'] md:grid-cols-[250px_minmax(0,1fr)] md:gap-x-8 md:[grid-template-areas:'cover_info'_'cover_buy'_'cover_about'] lg:grid-cols-[300px_minmax(0,1fr)_340px] lg:gap-x-10 lg:[grid-template-areas:'cover_info_buy'_'cover_about_buy'] xl:grid-cols-[340px_minmax(0,1fr)_360px]">
             <div className="hidden [grid-area:cover] md:block">
               <div className="sticky top-[100px]">
-                <BookGallery
-                  title={book.title}
-                  author={book.author}
-                  coverUrl={book.cover_url}
-                  palette={book.cover_palette}
-                  images={book.images}
-                  discountPct={book.discount_pct}
-                  ebookBadge={ebookBadge}
-                />
+                <div className="nk-book-girih nk-book-fade rounded-[26px] border border-line bg-card-2 px-7 pb-10 pt-8 lg:px-9">
+                  <BookGallery
+                    title={book.title}
+                    author={book.author}
+                    coverUrl={book.cover_url}
+                    palette={book.cover_palette}
+                    images={book.images}
+                    discountPct={book.discount_pct}
+                    ebookBadge={ebookBadge}
+                  />
+                </div>
               </div>
             </div>
 
             <header className="min-w-0 [grid-area:info]">
-              <p className="text-[11px] font-bold uppercase tracking-[.14em] text-wine-ink">
-                {t("book.catalogNo", { no: book.catalog_no })}
-                {genre && ` · ${genre}`}
-              </p>
-              <h1 className="mt-2 font-serif text-[28px] font-semibold leading-[1.15] tracking-[-0.01em] text-ink sm:text-[34px] lg:text-[40px]">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex h-7 items-center rounded-full border border-line bg-card px-3 text-[11.5px] font-bold tabular-nums tracking-[.04em] text-muted">
+                  {t("book.catalogNo", { no: book.catalog_no })}
+                </span>
+                {genre && book.genre_slug && (
+                  <Link
+                    href={`/catalog?genre=${encodeURIComponent(book.genre_slug)}`}
+                    className="inline-flex h-7 items-center gap-1.5 rounded-full bg-wine-soft px-3 text-[11px] font-bold uppercase tracking-[.1em] text-wine-ink transition hover:bg-wine-line/60"
+                  >
+                    <span aria-hidden className="size-1.5 rotate-45 bg-wine" />
+                    {genre}
+                  </Link>
+                )}
+              </div>
+              <h1 className="mt-3.5 text-balance font-serif text-[28px] font-semibold leading-[1.15] tracking-[-0.01em] text-ink sm:text-[34px] lg:text-[40px]">
                 {book.title}
               </h1>
-              <p className="mt-2 text-[15px] text-muted">
-                {book.author && (
-                  <>
-                    <span className="sr-only">{t("book.byAuthor")}: </span>
-                    <Link href={authorHref} className="font-semibold text-ink-2 underline-offset-4 hover:text-wine-ink hover:underline">
-                      {book.author}
-                    </Link>
-                  </>
-                )}
-                {book.pages ? `${book.author ? " · " : ""}${t("book.pagesCount", { count: book.pages })}` : ""}
-              </p>
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+              {book.author && (
+                <p className="mt-2.5 text-[15px] text-muted">
+                  <span>{t("book.byAuthor")}: </span>
+                  <Link href={authorHref} className="font-semibold text-ink-2 underline decoration-line-strong underline-offset-4 transition hover:text-wine-ink hover:decoration-wine-line">
+                    {book.author}
+                  </Link>
+                </p>
+              )}
+
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                 {book.rating_count > 0 ? (
-                  <a href="#reviews" className="inline-flex items-center gap-2" aria-label={t("book.ratingLabel", { value: rating.toFixed(1) })}>
+                  <a
+                    href="#reviews"
+                    className="inline-flex min-h-10 items-center gap-2 rounded-full"
+                    aria-label={`${t("book.ratingLabel", { value: rating.toFixed(1) })}, ${t("book.reviewsLink", { count: book.rating_count })}`}
+                  >
                     <RatingStars value={rating} size={16} />
                     <span className="text-sm font-bold text-ink">{rating.toFixed(1)}</span>
                     <span className="text-sm font-semibold text-muted underline-offset-4 hover:underline">
@@ -271,7 +304,11 @@ export default async function BookPage({ params }: Props) {
                     </span>
                   </a>
                 ) : (
-                  <a href="#reviews" className="text-sm font-semibold text-muted hover:text-ink">
+                  <a
+                    href="#reviews"
+                    className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-muted transition hover:text-ink"
+                  >
+                    <MessageSquareText className="size-4 text-faint" aria-hidden />
                     {t("book.noRating")}
                   </a>
                 )}
@@ -280,42 +317,63 @@ export default async function BookPage({ params }: Props) {
                   <FavoriteButton bookId={book.id} slug={book.slug} initialFavorite={favorite} />
                 </div>
               </div>
+
+              {facts.length > 1 && (
+                <dl
+                  aria-label={t("book.facts")}
+                  className={`mt-5 grid gap-px overflow-hidden rounded-[18px] border border-line bg-line-soft ${FACT_COLS[facts.length] ?? "grid-cols-2"}`}
+                >
+                  {facts.map(({ icon: Icon, label, value }) => (
+                    <div key={label} className="flex min-w-0 flex-col gap-1 bg-card px-3.5 py-3">
+                      <dt className="flex items-center gap-1.5 text-[11px] font-semibold text-muted">
+                        <Icon className="size-3.5 shrink-0 text-wine-ink" aria-hidden />
+                        <span className="truncate">{label}</span>
+                      </dt>
+                      <dd className="truncate text-[14px] font-bold text-ink">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
             </header>
 
             <div className="min-w-0 [grid-area:buy]">
               <div className="lg:sticky lg:top-[100px]">{purchase}</div>
             </div>
 
-            <div className="min-w-0 space-y-8 [grid-area:about]">
+            <div className="min-w-0 space-y-9 [grid-area:about]">
               <section aria-labelledby="book-about">
-                <h2 id="book-about" className="mb-3 font-serif text-xl font-semibold text-ink">
+                <SectionHeading id="book-about" className="mb-4">
                   {t("book.about")}
-                </h2>
+                </SectionHeading>
                 <BookDescription text={description} />
+
+                {book.tags.length > 0 && (
+                  <ul className="mt-5 flex flex-wrap gap-2">
+                    {book.tags.map((tag) => (
+                      <li key={tag}>
+                        <Link
+                          href={`/catalog?q=${encodeURIComponent(tag)}`}
+                          className="inline-flex min-h-8 items-center rounded-full border border-line bg-card px-3 text-xs font-semibold text-ink-2 transition hover:border-wine-line hover:bg-wine-soft hover:text-wine-ink"
+                        >
+                          <span className="mr-0.5 text-faint">#</span>
+                          {tag}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </section>
 
-              {book.tags.length > 0 && (
-                <ul className="flex flex-wrap gap-2">
-                  {book.tags.map((tag) => (
-                    <li key={tag}>
-                      <Link
-                        href={`/catalog?q=${encodeURIComponent(tag)}`}
-                        className="inline-flex rounded-full bg-chip px-3 py-1.5 text-xs font-semibold text-ink-2 transition hover:bg-wine-soft hover:text-wine-ink"
-                      >
-                        #{tag}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <section aria-labelledby="book-details" className="rounded-[18px] border border-line bg-card p-5">
-                <h2 id="book-details" className="mb-3 text-base font-bold text-ink">
+              <section aria-labelledby="book-details">
+                <SectionHeading id="book-details" className="mb-4">
                   {t("book.details.title")}
-                </h2>
-                <dl className="divide-y divide-line-soft text-sm">
-                  {details.map((row) => (
-                    <div key={row.label} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-4 py-2.5">
+                </SectionHeading>
+                <dl className="overflow-hidden rounded-[18px] border border-line bg-card text-sm">
+                  {details.map((row, i) => (
+                    <div
+                      key={row.label}
+                      className={`grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-4 px-4 py-3 sm:px-5 ${i % 2 === 1 ? "bg-card-2" : ""} ${i > 0 ? "border-t border-line-soft" : ""}`}
+                    >
                       <dt className="text-muted">{row.label}</dt>
                       <dd className="break-words font-semibold text-ink">{row.value}</dd>
                     </div>
@@ -325,7 +383,9 @@ export default async function BookPage({ params }: Props) {
             </div>
           </div>
 
-          <div className="mt-14 lg:mt-20">
+          <OrnamentRule className="mx-auto mt-14 max-w-md lg:mt-20" />
+
+          <div className="mt-10 lg:mt-14">
             <ReviewsSection bookId={book.id} slug={book.slug} userId={userId} />
           </div>
         </div>

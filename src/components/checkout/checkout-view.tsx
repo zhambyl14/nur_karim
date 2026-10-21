@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useCart } from "@/lib/cart/store";
 import { useI18n } from "@/lib/i18n/client";
 import { formatPrice } from "@/lib/format";
-import { isValidPhone, normalizePhone } from "@/lib/phone";
+import { formatPhone, isValidPhone, normalizePhone } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import { BookCover } from "@/components/book/book-cover";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -62,7 +62,10 @@ function CheckoutForm({
   const saved = useMemo(() => draftFromSaved(profile.savedAddress), [profile.savedAddress]);
   const [mountedAt] = useState(() => Date.now());
   const [mode, setMode] = useState<Mode>(initialMode);
+  // Name and phone come from the account (required at registration); the form only
+  // asks for them when an older account has them missing.
   const [contact, setContact] = useState({ name: profile.name, phone: profile.phone });
+  const [needContact] = useState(() => !profile.name.trim() || !isValidPhone(profile.phone));
   const [method, setMethod] = useState<ShipMethod | null>(saved.method);
   // recipient defaults to the account holder until a saved address says otherwise
   const [address, setAddress] = useState<AddressDraft>(() => ({
@@ -99,7 +102,7 @@ function CheckoutForm({
   };
   const addressErrors =
     hasPaper && method
-      ? validateAddress(method, activeAddress, { regionOnly: friendFills, recipient: !isGift })
+      ? validateAddress(method, activeAddress, { regionOnly: friendFills, recipient: false })
       : {};
   const giftErrors = isGift ? validateGift(gift, mountedAt) : {};
   const methodMissing = hasPaper && !method;
@@ -165,11 +168,11 @@ function CheckoutForm({
     const ordered = quote.lines.map((l) => ({ bookId: l.book_id, format: l.format }));
     const items = lines.map((l) => ({ book_id: l.bookId, format: l.format, quantity: l.quantity }));
     const addr: Record<string, string> = hasPaper && method ? addressPayload(method, activeAddress, friendFills) : {};
-    if (isGift && !friendFills && hasPaper) {
-      // the recipient of the parcel is the friend unless the sender typed someone else
+    if (hasPaper && !friendFills) {
+      // the parcel goes to the friend (gift) or to the account holder: no need to type it twice
       const a = addr as Record<string, string>;
-      if (!a.recipient_name) a.recipient_name = gift.name.trim();
-      if (!a.recipient_phone) a.recipient_phone = normalizePhone(gift.phone) ?? "";
+      a.recipient_name = isGift ? gift.name.trim() : contact.name.trim();
+      a.recipient_phone = (isGift ? normalizePhone(gift.phone) : normalizePhone(contact.phone)) ?? "";
     }
     setServerError(null);
     startTransition(async () => {
@@ -253,6 +256,7 @@ function CheckoutForm({
             </Section>
           )}
 
+          {needContact ? (
           <Section icon={<User className="size-4" />} title={t("checkout.steps.contact")} step={1}>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field
@@ -286,9 +290,21 @@ function CheckoutForm({
             </div>
             <p className="mt-2 text-xs text-faint">{t("checkout.contact.hint")}</p>
           </Section>
+          ) : (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-line bg-card px-4 py-3 text-[13px]">
+              <User className="size-4 shrink-0 text-muted" aria-hidden />
+              <span className="font-semibold text-muted">{t("checkout.contact.fromAccount")}</span>
+              <span className="min-w-0 font-bold text-ink">
+                {contact.name} · {formatPhone(contact.phone)}
+              </span>
+              <Link href="/account/settings" className="ml-auto text-xs font-bold text-wine-ink hover:underline">
+                {t("checkout.contact.change")}
+              </Link>
+            </div>
+          )}
 
           {isGift && (
-            <Section icon={<Gift className="size-4" />} title={t("checkout.steps.gift")} step={2} accent>
+            <Section icon={<Gift className="size-4" />} title={t("checkout.steps.gift")} step={needContact ? 2 : 1} accent>
               <GiftPanel
                 value={gift}
                 onChange={(patch) => setGift((g) => ({ ...g, ...patch }))}
@@ -301,7 +317,7 @@ function CheckoutForm({
             </Section>
           )}
 
-          <Section icon={<Truck className="size-4" />} title={t("checkout.steps.delivery")} step={isGift ? 3 : 2}>
+          <Section icon={<Truck className="size-4" />} title={t("checkout.steps.delivery")} step={(needContact ? 1 : 0) + (isGift ? 2 : 1)}>
             {hasPaper ? (
               <div className="grid gap-4">
                 {friendFills && (
@@ -350,8 +366,12 @@ function CheckoutForm({
                     {!isGift && saved.method === method && (
                       <p className="mb-3 text-xs font-semibold text-info">{t("checkout.delivery.savedAddress")}</p>
                     )}
-                    {isGift && !friendFills && (
-                      <p className="mb-3 text-xs text-muted">{t("checkout.gift.recipientIsFriend")}</p>
+                    {!friendFills && (
+                      <p className="mb-3 text-xs text-muted">
+                        {isGift
+                          ? t("checkout.gift.recipientIsFriend")
+                          : t("checkout.delivery.recipientIsYou", { name: contact.name || "—" })}
+                      </p>
                     )}
                     <AddressFields
                       key={`${isGift ? "gift" : "self"}-${method}`}
@@ -362,6 +382,7 @@ function CheckoutForm({
                       }
                       errors={submitted ? addressErrors : {}}
                       regionOnly={friendFills}
+                      showRecipient={false}
                     />
                   </div>
                 )}
@@ -379,7 +400,7 @@ function CheckoutForm({
             )}
           </Section>
 
-          <Section title={t("checkout.steps.extra")} step={isGift ? 4 : 3}>
+          <Section title={t("checkout.steps.extra")} step={(needContact ? 1 : 0) + (isGift ? 3 : 2)}>
             <div className="grid gap-4">
               <PromoField
                 code={promoCode}

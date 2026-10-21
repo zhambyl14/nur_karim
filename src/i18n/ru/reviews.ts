@@ -2,6 +2,7 @@ import type { Dictionary } from "../kk";
 
 const reviews: Dictionary["reviews"] = {
   title: "Отзывы",
+  eyebrow: "Что говорят читатели",
   count: "{count} отзыв|{count} отзыва|{count} отзывов",
   average: "Средняя оценка",
   basedOn: "на основе {count} отзыва|на основе {count} отзывов|на основе {count} отзывов",
@@ -9,8 +10,9 @@ const reviews: Dictionary["reviews"] = {
   starsRow: "{stars} зв.",
   starsRowCount: "{stars} зв.: {count}",
   empty: {
-    title: "Пока нет отзывов",
-    text: "Станьте первым читателем, который поделится впечатлениями об этой книге.",
+    title: "Оставьте первый отзыв",
+    text: "Уже прочитали эту книгу? Поделитесь впечатлениями — честный отзыв поможет другим читателям сделать выбор.",
+    note: "Отзывы оставляют читатели, купившие книгу в нашем магазине.",
   },
   showMore: "Показать ещё {count}",
   adminReply: "Ответ магазина",

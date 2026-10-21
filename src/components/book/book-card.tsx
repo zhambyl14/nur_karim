@@ -42,51 +42,88 @@ export function BookCard({
   return (
     <article
       className={cn(
-        "group relative flex flex-col rounded-2xl border border-line bg-card transition duration-200 hover:-translate-y-1 hover:shadow-lift",
-        compact ? "gap-2 p-2 pb-2.5" : "gap-3 p-3 pb-3.5",
+        "group relative flex flex-col rounded-[18px] border border-line bg-card shadow-card transition duration-300 ease-out",
+        "hover:-translate-y-1 hover:border-line-strong hover:shadow-lift active:translate-y-0 active:duration-100",
+        "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        compact ? "gap-2 p-2 pb-2.5" : "gap-3 p-3 pb-3",
         className,
       )}
     >
-      <Link href={`/books/${book.slug}`} className="absolute inset-0 z-0 rounded-2xl" aria-label={book.title} />
+      <Link
+        href={`/books/${book.slug}`}
+        className="absolute inset-0 z-0 rounded-[18px] focus-visible:outline-offset-[3px]"
+        aria-label={book.title}
+      />
       {/* Cover and texts let clicks through to the card link underneath */}
-      <div className="pointer-events-none">
-        <BookCover
-          title={book.title}
-          author={book.author}
-          coverUrl={book.cover_url}
-          palette={book.cover_palette}
-          size={compact ? "sm" : "md"}
-          ebookBadge={book.ebook_available ? t("common.format.ebookBadge") : null}
-          discountPct={outOfStock ? book.discount_pct : discountPct}
-          priority={priority}
-        />
+      <div className="pointer-events-none relative">
+        <div
+          className={cn(
+            "nk-book-shadow rounded-[3px_8px_8px_3px] transition duration-300 ease-out group-hover:-translate-y-0.5 motion-reduce:transition-none",
+            outOfStock && "opacity-60 grayscale-[.45]",
+          )}
+        >
+          <BookCover
+            title={book.title}
+            author={book.author}
+            coverUrl={book.cover_url}
+            palette={book.cover_palette}
+            size={compact ? "sm" : "md"}
+            ebookBadge={book.ebook_available ? t("common.format.ebookBadge") : null}
+            discountPct={outOfStock ? null : discountPct}
+            priority={priority}
+          />
+        </div>
+        {outOfStock && (
+          <span className="absolute inset-x-0 bottom-3 mx-auto w-fit rounded-full bg-card/95 px-3 py-1 text-[11px] font-bold text-ink-2 shadow-card ring-1 ring-line">
+            {t("catalog.card.soldOut")}
+          </span>
+        )}
       </div>
-      <div className={cn("pointer-events-none flex flex-col gap-1", compact ? "px-0.5" : "px-1")}>
+      <div className={cn("pointer-events-none flex flex-1 flex-col", compact ? "px-0.5" : "px-1")}>
         {!compact && (
-          <div className="truncate text-[11px] font-semibold text-faint">
-            № {book.catalog_no}
-            {genre ? ` · ${genre}` : ""}
+          <div className="mb-1 flex items-center justify-between gap-2 text-[10.5px] font-bold uppercase tracking-[.08em] text-muted">
+            <span className="min-w-0 truncate">{genre}</span>
+            <span className="hidden shrink-0 tabular-nums tracking-normal sm:inline">№ {book.catalog_no}</span>
           </div>
         )}
-        <h3 className={cn("line-clamp-2 font-bold leading-[1.3] text-ink", compact ? "min-h-[32px] text-[12.5px]" : "min-h-[36px] text-sm")}>
+        <h3
+          className={cn(
+            "line-clamp-3 font-serif font-semibold leading-[1.28] text-ink transition-colors group-hover:text-wine-ink",
+            compact ? "min-h-[32px] text-[13px]" : "min-h-[38px] text-[15px]",
+          )}
+        >
           {book.title}
         </h3>
-        {!compact && <div className="truncate text-xs font-medium text-muted">{book.author}</div>}
-        {!compact && book.rating_count > 0 && <RatingStars value={Number(book.rating_avg)} count={book.rating_count} size={12} />}
+        {!compact && (
+          <div className="mt-1 min-h-[18px] truncate text-[12.5px] font-medium text-muted">{book.author}</div>
+        )}
+        {!compact && book.rating_count > 0 && (
+          <RatingStars className="mt-1.5" value={Number(book.rating_avg)} count={book.rating_count} size={12} />
+        )}
       </div>
-      <div className={cn("relative z-10 mt-auto flex items-center justify-between gap-2", compact ? "px-0.5" : "px-1")}>
-        <div className="min-w-0">
+      <div
+        className={cn(
+          "relative z-10 flex min-h-10 items-center justify-between gap-2 border-t border-line-soft pt-2.5",
+          compact ? "px-0.5" : "px-1",
+        )}
+      >
+        <div className="pointer-events-none min-w-0">
           {outOfStock ? (
-            <span className="text-xs font-bold text-faint">{t("common.states.soldOut")}</span>
+            <span className="text-[13px] font-semibold text-muted">{t("common.states.soldOut")}</span>
           ) : (
             <Price
               amount={price}
               original={original}
-              className={compact ? "text-sm" : "text-[17px]"}
-              originalClassName={compact ? "text-[10px]" : undefined}
+              className={cn("tracking-[-0.01em]", compact ? "text-[15px]" : "text-lg")}
+              originalClassName={compact ? "text-[10px]" : "text-[11.5px]"}
             />
           )}
-          {onlyEbook && !compact && <div className="text-[11px] font-semibold text-wine-ink">{t("common.format.ebook")}</div>}
+          {onlyEbook && !compact && (
+            <div className="mt-0.5 flex items-center gap-1.5 text-[11px] font-semibold text-wine-ink">
+              <span className="nk-diamond size-[5px]" aria-hidden />
+              {t("common.format.ebook")}
+            </div>
+          )}
         </div>
         {format && (
           <AddToCartButton
@@ -94,7 +131,8 @@ export function BookCard({
             format={format}
             title={book.title}
             variant="icon"
-            className={compact ? "size-8 rounded-[9px]" : undefined}
+            label={t("catalog.card.addToCart", { title: book.title })}
+            className={cn("shadow-card", compact ? "size-9 rounded-[10px]" : "size-10 rounded-[11px]")}
           />
         )}
       </div>
@@ -127,11 +165,17 @@ export function BookGrid({
 
 export function BookCardSkeleton() {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-line bg-card p-3 pb-3.5">
-      <div className="nk-skeleton aspect-[3/4] w-full rounded-[4px_9px_9px_4px]" />
-      <div className="nk-skeleton h-3 w-1/2 rounded" />
-      <div className="nk-skeleton h-4 w-4/5 rounded" />
-      <div className="nk-skeleton h-5 w-1/3 rounded" />
+    <div className="flex flex-col gap-3 rounded-[18px] border border-line bg-card p-3 pb-3" aria-hidden>
+      <div className="nk-skeleton aspect-[3/4] w-full rounded-[3px_8px_8px_3px]" />
+      <div className="flex flex-col gap-2 px-1">
+        <div className="nk-skeleton h-2.5 w-2/5 rounded" />
+        <div className="nk-skeleton h-4 w-4/5 rounded" />
+        <div className="nk-skeleton h-3 w-1/2 rounded" />
+      </div>
+      <div className="flex items-center justify-between border-t border-line-soft px-1 pt-2.5">
+        <div className="nk-skeleton h-5 w-1/3 rounded" />
+        <div className="nk-skeleton size-10 rounded-[11px]" />
+      </div>
     </div>
   );
 }

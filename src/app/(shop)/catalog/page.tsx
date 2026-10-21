@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SearchX } from "lucide-react";
+import { BookOpen, SearchX } from "lucide-react";
 import { searchBooks } from "@/lib/data/books";
 import { getGenres } from "@/lib/data/common";
 import { getI18n } from "@/lib/i18n/server";
@@ -9,13 +9,30 @@ import { CATALOG_PAGE_SIZE } from "@/lib/constants";
 import { BookGrid } from "@/components/book/book-card";
 import { EmptyState, Pagination } from "@/components/ui/misc";
 import { buttonVariants } from "@/components/ui/button";
-import { SectionTitle } from "@/components/ui/card";
 import { ActiveFilters } from "@/components/catalog/active-filters";
+import { CatalogHeader } from "@/components/catalog/catalog-header";
 import { CatalogSearch } from "@/components/catalog/catalog-search";
 import { DesktopFilters, MobileFilters } from "@/components/catalog/catalog-filters";
 import { GenreChips } from "@/components/catalog/genre-chips";
 import { SortSelect } from "@/components/catalog/sort-select";
 import { catalogHref, hasAnyFilter, parseCatalogParams, type RawSearchParams } from "@/components/catalog/params";
+import type { TKey } from "@/lib/i18n/translate";
+
+/** Short description under the heading for each genre (slugs from the genres table) */
+const GENRE_INTRO: Record<string, TKey> = {
+  akida: "catalog.genreIntro.akida",
+  fikh: "catalog.genreIntro.fikh",
+  patualar: "catalog.genreIntro.patualar",
+  sira: "catalog.genreIntro.sira",
+  hadis: "catalog.genreIntro.hadis",
+  tarbie: "catalog.genreIntro.tarbie",
+  tarikh: "catalog.genreIntro.tarikh",
+  ekonomika: "catalog.genreIntro.ekonomika",
+  til: "catalog.genreIntro.til",
+  uagyz: "catalog.genreIntro.uagyz",
+  entsiklopediya: "catalog.genreIntro.entsiklopediya",
+  dini: "catalog.genreIntro.dini",
+};
 
 type Props = { searchParams: Promise<RawSearchParams> };
 
@@ -53,17 +70,34 @@ export default async function CatalogPage({ searchParams }: Props) {
   const popular = items.length === 0 ? (await searchBooks({ sort: "popular", pageSize: 5 })).items : [];
   const stateKey = catalogHref(params);
 
+  const genre = params.genre ? genres.find((g) => g.slug === params.genre) : undefined;
+  const genreName = genre ? (locale === "ru" ? genre.name_ru : genre.name_kk) : undefined;
   const title = params.author
     ? t("catalog.titleAuthor", { author: params.author })
     : params.format === "ebook"
       ? t("catalog.titleEbooks")
-      : t("catalog.title");
+      : (genreName ?? t("catalog.title"));
+  const intro = params.q
+    ? t("catalog.introSearch", { q: params.q })
+    : params.author
+      ? t("catalog.introAuthor")
+      : params.format === "ebook"
+        ? t("catalog.introEbooks")
+        : genre && GENRE_INTRO[genre.slug]
+          ? t(GENRE_INTRO[genre.slug])
+          : t("catalog.intro");
+  const ebooksOnlyEmpty = items.length === 0 && params.format === "ebook" && !params.q;
 
   return (
     <div className="nk-container py-6 sm:py-8 lg:py-10">
-      <SectionTitle as="h1" title={title} meta={t("catalog.count", { count: total })} />
+      <CatalogHeader
+        eyebrow={genreName || params.author || params.format === "ebook" ? t("catalog.title") : t("catalog.eyebrow")}
+        title={title}
+        count={t("catalog.count", { count: total })}
+        intro={intro}
+      />
 
-      <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
+      <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3 lg:mt-6">
         <CatalogSearch params={params} className="col-span-2 sm:min-w-0 sm:flex-1" />
         <MobileFilters key={`m-${stateKey}`} params={params} className="lg:hidden" />
         <SortSelect params={params} className="sm:w-[230px] sm:shrink-0" />
@@ -90,7 +124,7 @@ export default async function CatalogPage({ searchParams }: Props) {
         <ActiveFilters params={params} genres={genres} />
       </div>
 
-      <div className="mt-6 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:gap-8">
+      <div className="mt-6 lg:grid lg:grid-cols-[256px_minmax(0,1fr)] lg:items-start lg:gap-8">
         <div className="hidden lg:block">
           <DesktopFilters key={`d-${stateKey}`} params={params} />
         </div>
@@ -113,13 +147,24 @@ export default async function CatalogPage({ searchParams }: Props) {
               )}
             </>
           ) : (
-            <div className="rounded-[18px] border border-line bg-card">
+            <div className="overflow-hidden rounded-[22px] border border-line bg-card shadow-card">
               <EmptyState
-                icon={<SearchX className="size-6" />}
-                title={t("catalog.empty.title")}
-                description={params.q ? t("catalog.empty.textSearch", { q: params.q }) : t("catalog.empty.text")}
+                className="relative isolate"
+                icon={ebooksOnlyEmpty ? <BookOpen className="size-6" /> : <SearchX className="size-6" />}
+                title={ebooksOnlyEmpty ? t("catalog.empty.ebooksTitle") : t("catalog.empty.title")}
+                description={
+                  ebooksOnlyEmpty
+                    ? t("catalog.empty.ebooksText")
+                    : params.q
+                      ? t("catalog.empty.textSearch", { q: params.q })
+                      : t("catalog.empty.text")
+                }
                 action={
-                  hasAnyFilter(params) ? (
+                  ebooksOnlyEmpty ? (
+                    <Link href={catalogHref(params, { format: "paper" })} className={buttonVariants({ variant: "ink" })}>
+                      {t("catalog.empty.ebooksAction")}
+                    </Link>
+                  ) : hasAnyFilter(params) ? (
                     <Link href={catalogHref({ sort: params.sort })} className={buttonVariants({ variant: "ink" })}>
                       {t("catalog.empty.reset")}
                     </Link>
@@ -127,7 +172,7 @@ export default async function CatalogPage({ searchParams }: Props) {
                 }
               />
               {(genres.length > 0 || popular.length > 0) && (
-                <div className="border-t border-line-soft px-4 pb-6 pt-6 sm:px-6">
+                <div className="border-t border-line-soft bg-card-2 px-4 pb-6 pt-6 sm:px-6">
                   {genres.length > 0 && (
                     <>
                       <h2 className="mb-3 text-sm font-bold text-ink">{t("catalog.empty.suggestions")}</h2>

@@ -20,7 +20,7 @@ export function SortSelect({ params, className }: { params: CatalogParams; class
       <label htmlFor={id} className="sr-only">
         {t("catalog.sortLabel")}
       </label>
-      <ArrowDownUp className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-faint" aria-hidden />
+      <ArrowDownUp className="pointer-events-none absolute left-3 top-1/2 size-4 sm:left-3.5 -translate-y-1/2 text-faint" aria-hidden />
       <select
         id={id}
         value={value}
@@ -30,7 +30,7 @@ export function SortSelect({ params, className }: { params: CatalogParams; class
           startTransition(() => router.push(catalogHref(params, { sort }), { scroll: false }));
         }}
         className={cn(
-          "h-[50px] w-full cursor-pointer appearance-none rounded-[13px] border border-line bg-card pl-10 pr-9 text-sm font-semibold text-ink transition",
+          "h-[50px] w-full cursor-pointer appearance-none rounded-[14px] border border-line bg-card pl-9 pr-8 text-[13px] font-semibold sm:pl-10 sm:pr-9 sm:text-sm text-ink shadow-card transition",
           "hover:border-line-strong focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15",
           pending && "opacity-60",
         )}
@@ -41,7 +41,7 @@ export function SortSelect({ params, className }: { params: CatalogParams; class
           </option>
         ))}
       </select>
-      <svg className="pointer-events-none absolute right-3.5 top-1/2 size-3 -translate-y-1/2 text-faint" viewBox="0 0 12 12" aria-hidden>
+      <svg className="pointer-events-none absolute right-3 top-1/2 size-3 sm:right-3.5 -translate-y-1/2 text-faint" viewBox="0 0 12 12" aria-hidden>
         <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>

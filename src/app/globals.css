@@ -310,3 +310,98 @@
     display: none !important;
   }
 }
+
+/* design: book — book page (cover stage, girih pattern, ornament rule) */
+@utility nk-book-girih {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background-color: var(--nk-book-girih-color, var(--nk-gold));
+    opacity: var(--nk-book-girih-opacity, 0.16);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Crect x='12' y='12' width='24' height='24'/%3E%3Crect x='12' y='12' width='24' height='24' transform='rotate(45 24 24)'/%3E%3Cpath d='M0 0L12 12M48 0L36 12M0 48L12 36M48 48L36 36'/%3E%3C/g%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Crect x='12' y='12' width='24' height='24'/%3E%3Crect x='12' y='12' width='24' height='24' transform='rotate(45 24 24)'/%3E%3Cpath d='M0 0L12 12M48 0L36 12M0 48L12 36M48 48L36 36'/%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-size: 48px 48px;
+    mask-size: 48px 48px;
+  }
+}
+
+/* soft vignette that fades the girih pattern towards the edges */
+@utility nk-book-fade {
+  &::before {
+    -webkit-mask-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Crect x='12' y='12' width='24' height='24'/%3E%3Crect x='12' y='12' width='24' height='24' transform='rotate(45 24 24)'/%3E%3Cpath d='M0 0L12 12M48 0L36 12M0 48L12 36M48 48L36 36'/%3E%3C/g%3E%3C/svg%3E"),
+      radial-gradient(closest-side, #000 30%, transparent 100%);
+    mask-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Crect x='12' y='12' width='24' height='24'/%3E%3Crect x='12' y='12' width='24' height='24' transform='rotate(45 24 24)'/%3E%3Cpath d='M0 0L12 12M48 0L36 12M0 48L12 36M48 48L36 36'/%3E%3C/g%3E%3C/svg%3E"),
+      radial-gradient(closest-side, #000 30%, transparent 100%);
+    -webkit-mask-size: 48px 48px, 100% 100%;
+    mask-size: 48px 48px, 100% 100%;
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+}
+/* end design: book */
+
+/* design: catalog ------------------------------------------------------------
+   Girih lattice (8-point stars joined by straight lines) used as a mask, so the
+   ornament takes any colour via background-color. */
+@utility nk-cover-girih {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='black' stroke-width='1.4'%3E%3Crect x='12.2' y='12.2' width='15.6' height='15.6'/%3E%3Crect x='12.2' y='12.2' width='15.6' height='15.6' transform='rotate(45 20 20)'/%3E%3Cpath d='M0 0 12.2 12.2M40 0 27.8 12.2M0 40 12.2 27.8M40 40 27.8 27.8M20 0v9M20 31v9M0 20h9M31 20h9'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='black' stroke-width='1.4'%3E%3Crect x='12.2' y='12.2' width='15.6' height='15.6'/%3E%3Crect x='12.2' y='12.2' width='15.6' height='15.6' transform='rotate(45 20 20)'/%3E%3Cpath d='M0 0 12.2 12.2M40 0 27.8 12.2M0 40 12.2 27.8M40 40 27.8 27.8M20 0v9M20 31v9M0 20h9M31 20h9'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 19cqw 19cqw;
+  mask-size: 19cqw 19cqw;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* same lattice at a fixed tile size, for page ornaments (catalog header) */
+@utility nk-girih {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Crect x='12.2' y='12.2' width='15.6' height='15.6'/%3E%3Crect x='12.2' y='12.2' width='15.6' height='15.6' transform='rotate(45 20 20)'/%3E%3Cpath d='M0 0 12.2 12.2M40 0 27.8 12.2M0 40 12.2 27.8M40 40 27.8 27.8M20 0v9M20 31v9M0 20h9M31 20h9'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Crect x='12.2' y='12.2' width='15.6' height='15.6'/%3E%3Crect x='12.2' y='12.2' width='15.6' height='15.6' transform='rotate(45 20 20)'/%3E%3Cpath d='M0 0 12.2 12.2M40 0 27.8 12.2M0 40 12.2 27.8M40 40 27.8 27.8M20 0v9M20 31v9M0 20h9M31 20h9'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 44px 44px;
+  mask-size: 44px 44px;
+}
+
+/* horizontal scroller that fades out at its edges (genre chips on phones) */
+@utility nk-fade-x {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 28px), transparent);
+}
+
+/* book shadow under covers in cards */
+@utility nk-book-shadow {
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.06),
+    0 10px 18px -10px rgb(var(--nk-shadow-color) / 0.45);
+}
+/* end design: catalog */
+
+/* design: home ---------------------------------------------------------------
+   Girih (8-point star lattice) line ornament for navy surfaces and a thin
+   gold hairline. Used by the home hero, gift section and site footer.
+   --------------------------------------------------------------------------- */
+@utility nk-girih {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23c8a35a' stroke-width='.8'%3E%3Cpath d='M16 16h32v32H16z'/%3E%3Cpath d='M32 9.4 54.6 32 32 54.6 9.4 32z'/%3E%3Cpath d='M32 0v9.4M32 54.6V64M0 32h9.4M54.6 32H64M0 0l16 16M64 0 48 16M0 64l16-16M64 64 48 48'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 64px 64px;
+  background-position: center;
+}
+
+@utility nk-hairline-gold {
+  background: linear-gradient(90deg, transparent, var(--nk-gold) 20%, var(--nk-gold) 80%, transparent);
+  height: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-home-motion,
+  .nk-home-motion * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* end design: home */
