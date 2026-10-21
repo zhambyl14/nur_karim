@@ -232,7 +232,7 @@ export function BookForm({
     const payload = toPayload({ ...values, slug: values.slug.replace(/^-+|-+$/g, "") });
     const parsed = bookSchema.safeParse(payload);
     const clientErrors = parsed.success ? {} : fieldErrorsFrom(parsed.error);
-    if (pageCount > 0 && (payload.ebook_preview_pages ?? 0) >= pageCount) clientErrors.ebook_preview_pages = "PREVIEW_TOO_MANY";
+    if (payload.ebook_enabled && pageCount > 0 && (payload.ebook_preview_pages ?? 0) >= pageCount) clientErrors.ebook_preview_pages = "PREVIEW_TOO_MANY";
     if (slugStatus === "taken") clientErrors.slug = "SLUG_TAKEN";
     if (Object.keys(clientErrors).length > 0) {
       setErrors(clientErrors);

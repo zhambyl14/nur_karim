@@ -88,7 +88,7 @@ export async function updateBook(
   if (!current) return { ok: false, error: "NOT_FOUND" };
 
   const values = parsed.data;
-  if (current.ebook_page_count > 0 && values.ebook_preview_pages >= current.ebook_page_count) {
+  if (values.ebook_enabled && current.ebook_page_count > 0 && values.ebook_preview_pages >= current.ebook_page_count) {
     return { ok: false, error: "VALIDATION", fieldErrors: { ebook_preview_pages: "PREVIEW_TOO_MANY" } };
   }
   if (values.slug !== current.slug && (await slugTaken(supabase, values.slug, id.data))) {
