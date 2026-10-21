@@ -198,7 +198,7 @@ function CartSummary({
 
   return (
     <aside className="max-lg:contents lg:sticky lg:top-[100px]" aria-label={t("cart.summary.title")}>
-      <div className="mt-6 rounded-t-[28px] bg-navy px-5 pb-2 pt-5 text-white sm:px-6 lg:mt-0 lg:rounded-t-[22px] lg:pt-6">
+      <div className="mt-6 rounded-t-[24px] bg-navy px-5 pb-2 pt-5 text-white sm:px-6 lg:mt-0 lg:rounded-t-[22px] lg:pt-6">
         <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.14em] text-gold">{t("cart.summary.title")}</h2>
         {error && !quote ? (
           <div className="pb-3" role="alert">
@@ -251,7 +251,7 @@ function CartSummary({
         <div className="mt-4 h-px bg-white/12" />
       </div>
 
-      <div className="sticky bottom-[72px] z-10 rounded-b-[24px] rounded-t-[22px] bg-navy px-5 pb-5 pt-3 text-white shadow-[0_-14px_30px_rgb(0_0_0/0.18)] sm:px-6 md:bottom-0 lg:static lg:rounded-t-none lg:rounded-b-[22px] lg:pb-6 lg:shadow-none">
+      <div className="sticky bottom-[72px] z-10 rounded-b-[24px] bg-navy px-5 pb-5 pt-3 text-white shadow-[0_-14px_30px_rgb(0_0_0/0.18)] sm:px-6 md:bottom-0 lg:static lg:rounded-b-[22px] lg:pb-6 lg:shadow-none">
         <div className="flex items-baseline justify-between gap-3">
           <span className="text-sm font-semibold">{t("cart.summary.total")}</span>
           <span className="text-right">
