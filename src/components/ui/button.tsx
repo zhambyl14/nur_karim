@@ -40,7 +40,7 @@ export function buttonVariants({
   className,
 }: { variant?: ButtonVariant; size?: ButtonSize; className?: string } = {}) {
   return cn(
-    "inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap font-bold transition duration-150",
+    "inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap font-bold transition duration-150 [&_svg]:shrink-0",
     "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
     VARIANTS[variant],
     SIZES[size],

@@ -42,10 +42,56 @@ async function book(slug) {
   return data;
 }
 
+// The test does not depend on seed data: it picks three published paper books
+// without an active promotion and creates its own promotion + promo code
+// (both removed in cleanup). Book stock / sold_count are restored at the end.
+const { data: settings } = await svc.from("store_settings").select("*").eq("id", 1).single();
+const { data: promoted } = await svc.from("catalog_books").select("id").or("paper_final_price.lt.paper_price,ebook_final_price.lt.ebook_price");
+const promotedIds = new Set((promoted ?? []).map((b) => b.id));
+const { data: candidates } = await svc
+  .from("books")
+  .select("*")
+  .eq("is_published", true)
+  .eq("paper_enabled", true)
+  .gte("stock", 5)
+  .lt("stock", 99)
+  .order("paper_price", { ascending: true });
+const usable = (candidates ?? []).filter((b) => !promotedIds.has(b.id) && b.paper_price >= 100);
+if (usable.length < 3) throw new Error("need 3 published paper books (stock 5–98, no promotion)");
+const [b2, b1, b3] = [usable[0], usable[Math.floor(usable.length / 2)], usable[usable.length - 1]]; // b2 is the cheapest
+const snapshot = new Map([b1, b2, b3].map((b) => [b.id, { stock: b.stock, sold_count: b.sold_count }]));
+const PROMO = `QATEST${Date.now().toString(36).toUpperCase()}`;
+const promoMin = b2.paper_price + 1; // one b2 is below the minimum, two b1 are above it
+const promoPct = (sum) => Math.floor((sum * 10) / 100);
+const promoPrice = b3.paper_price - Math.floor((b3.paper_price * 10) / 100);
+const delivery = (method, subtotal) =>
+  settings.free_delivery_threshold !== null && subtotal >= settings.free_delivery_threshold
+    ? 0
+    : method === "kazpost"
+      ? settings.delivery_kazpost_price
+      : settings.delivery_astana_price;
+let promotionId = null;
+let promoCodeId = null;
+
 try {
-  const b1 = await book("paigambarlar-kissasy-balalarga"); // paper 3400
-  const b2 = await book("kishkentai-musylmannyn-adebi"); // paper 2800
-  const b3 = await book("kazak-khandygy-tarikhy"); // paper 7400, 10% promotion (tarikh), low stock
+  {
+    const { data: p, error } = await svc
+      .from("promotions")
+      .insert({ title_kk: "QA test −10%", title_ru: "QA test −10%", discount_type: "percent", discount_value: 10, scope: "books" })
+      .select("id")
+      .single();
+    if (error) throw error;
+    promotionId = p.id;
+    await svc.from("promotion_books").insert({ promotion_id: promotionId, book_id: b3.id });
+    const { data: pc, error: e2 } = await svc
+      .from("promo_codes")
+      .insert({ code: PROMO, discount_type: "percent", discount_value: 10, min_order_amount: promoMin, per_user_limit: 1, description: "QA test" })
+      .select("id")
+      .single();
+    if (e2) throw e2;
+    promoCodeId = pc.id;
+  }
+  console.log(`books: ${b1.slug} (${b1.paper_price}), ${b2.slug} (${b2.paper_price}), ${b3.slug} (${b3.paper_price})`);
   console.log("\n1. quote_cart");
   {
     const { data: q } = await guest.rpc("quote_cart", {
@@ -55,33 +101,35 @@ try {
       ],
     });
     check("guest can quote", q?.ok === true, q);
-    check("subtotal = 2×3400 + 2800", q?.subtotal === 9600, q?.subtotal);
+    check("subtotal = 2×b1 + b2", q?.subtotal === 2 * b1.paper_price + b2.paper_price, q?.subtotal);
     check("delivery required for paper", q?.delivery_required === true);
     const { data: q2 } = await guest.rpc("quote_cart", {
       p_items: [{ book_id: b1.id, format: "paper", quantity: 1 }],
       p_delivery_method: "kazpost",
     });
-    check("kazpost price 1500", q2?.delivery_price === 1500 && q2?.total === 3400 + 1500, q2);
+    const kp = delivery("kazpost", b1.paper_price);
+    check(`kazpost price ${kp}`, q2?.delivery_price === kp && q2?.total === b1.paper_price + kp, q2);
     const { data: q3 } = await guest.rpc("quote_cart", {
       p_items: [{ book_id: b3.id, format: "paper", quantity: 1 }],
       p_delivery_method: "astana_courier",
     });
-    check("history promotion −10% applied", q3?.lines?.[0]?.unit_final_price === 6660, q3?.lines?.[0]);
-    check("astana courier 1000", q3?.delivery_price === 1000 && q3?.total === 7660, q3);
+    check("promotion −10% applied", q3?.lines?.[0]?.unit_final_price === promoPrice, q3?.lines?.[0]);
+    const ac = delivery("astana_courier", promoPrice);
+    check(`astana courier ${ac}`, q3?.delivery_price === ac && q3?.total === promoPrice + ac, q3);
     const { data: q4 } = await guest.rpc("quote_cart", {
       p_items: [{ book_id: b1.id, format: "paper", quantity: 99 }],
     });
     check("out of stock detected", q4?.ok === false && q4?.errors?.[0]?.code === "OUT_OF_STOCK", q4?.errors);
     const { data: q5 } = await client.rpc("quote_cart", {
-      p_items: [{ book_id: b2.id, format: "paper", quantity: 1 }], // 2800 < min 3000
-      p_promo_code: "NURKARIM10",
+      p_items: [{ book_id: b2.id, format: "paper", quantity: 1 }], // below promoMin
+      p_promo_code: PROMO,
     });
     check("promo below min amount rejected", q5?.promo?.valid === false && q5?.promo?.error === "PROMO_MIN_AMOUNT", q5?.promo);
     const { data: q6 } = await client.rpc("quote_cart", {
       p_items: [{ book_id: b1.id, format: "paper", quantity: 2 }],
-      p_promo_code: "nurkarim10",
+      p_promo_code: PROMO.toLowerCase(),
     });
-    check("promo (case-insensitive) −10%", q6?.promo?.valid === true && q6?.promo_discount === 680, q6?.promo);
+    check("promo (case-insensitive) −10%", q6?.promo?.valid === true && q6?.promo_discount === promoPct(2 * b1.paper_price), q6?.promo);
     const { data: q7 } = await client.rpc("quote_cart", {
       p_items: [{ book_id: b1.id, format: "paper", quantity: 1 }],
       p_promo_code: "NOPE-CODE",
@@ -132,7 +180,8 @@ try {
     order1 = ok;
     created.push(ok?.order_id);
     const { data: o } = await client.from("orders").select("*").eq("id", ok.order_id).single();
-    check("order totals stored", o.total === 6800 + 1000 && o.delivery_price === 1000 && o.delivery_city === "Астана", o);
+    const ac = delivery("astana_courier", 2 * b1.paper_price);
+    check("order totals stored", o.total === 2 * b1.paper_price + ac && o.delivery_price === ac && o.delivery_city === "Астана", o);
     check("phone normalized", o.contact_phone === "87000000001", o.contact_phone);
     const stockAfter = (await book(b1.slug)).stock;
     check("stock reserved (−2)", stockAfter === stockBefore - 2, { stockBefore, stockAfter });
@@ -171,31 +220,31 @@ try {
     const { data: q } = await client.rpc("quote_cart", {
       p_items: [{ book_id: b2.id, format: "paper", quantity: 2 }],
       p_delivery_method: "kazpost",
-      p_promo_code: "NURKARIM10",
+      p_promo_code: PROMO,
     });
     const { data: ok } = await client.rpc("create_order", {
       p_payload: {
         items: [{ book_id: b2.id, format: "paper", quantity: 2 }],
         delivery_method: "kazpost",
-        promo_code: "NURKARIM10",
+        promo_code: PROMO,
         contact: { name: "Айдана Қасым", phone: CLIENT.phone },
         address: { region: "Қарағанды облысы", city: "Қарағанды", postal_code: "100000", street: "Бұқар жырау", house: "10", recipient_name: "Қасым Айдана Ерланқызы" },
         expected_total: q.total,
       },
     });
-    check("kazpost order with promo", ok?.ok === true && q.promo_discount === 560, { ok, promo: q.promo });
+    check("kazpost order with promo", ok?.ok === true && q.promo_discount === promoPct(2 * b2.paper_price), { ok, promo: q.promo });
     created.push(ok?.order_id);
-    const { data: pc } = await svc.from("promo_codes").select("used_count").eq("code", "NURKARIM10").single();
+    const { data: pc } = await svc.from("promo_codes").select("used_count").eq("code", PROMO).single();
     const { data: again } = await client.rpc("quote_cart", {
       p_items: [{ book_id: b2.id, format: "paper", quantity: 2 }],
-      p_promo_code: "NURKARIM10",
+      p_promo_code: PROMO,
     });
     check("per-user limit enforced", again?.promo?.error === "PROMO_ALREADY_USED", again?.promo);
     const { data: c1 } = await client.rpc("cancel_my_order", { p_order_id: ok.order_id });
     check("client cancels unpaid order", c1?.ok === true, c1);
     const after = (await book(b2.slug)).stock;
     check("stock restored", after === before, { before, after });
-    const { data: pc2 } = await svc.from("promo_codes").select("used_count").eq("code", "NURKARIM10").single();
+    const { data: pc2 } = await svc.from("promo_codes").select("used_count").eq("code", PROMO).single();
     check("promo use released", pc2.used_count === pc.used_count - 1, { before: pc.used_count, after: pc2.used_count });
   }
 
@@ -207,7 +256,7 @@ try {
       p_is_gift: true,
       p_gift_wrap: true,
     });
-    check("gift wrap priced", q?.gift_wrap_price === 500, q);
+    check(`gift wrap priced ${settings.gift_wrap_price}`, q?.gift_wrap_price === settings.gift_wrap_price, q);
     const { data: ok } = await client.rpc("create_order", {
       p_payload: {
         items: [{ book_id: b2.id, format: "paper", quantity: 1 }],
@@ -265,7 +314,7 @@ try {
     check("admin dashboard works", !de2 && typeof d2?.kpis?.revenue === "number", de2?.message ?? Object.keys(d2 ?? {}));
     const { error: ins } = await client.from("store_settings").update({ delivery_astana_price: 1 }).eq("id", 1);
     const { data: st } = await svc.from("store_settings").select("delivery_astana_price").eq("id", 1).single();
-    check("client cannot change settings", st.delivery_astana_price === 1000, { ins, st });
+    check("client cannot change settings", st.delivery_astana_price === settings.delivery_astana_price, { ins, st });
   }
 } catch (error) {
   failed++;
@@ -278,7 +327,12 @@ try {
       await admin.rpc("admin_update_order", { p_order_id: id, p_status: "cancelled", p_cancel_reason: "TEST" });
     }
     await svc.from("orders").delete().eq("id", id);
+    await svc.from("audit_log").delete().eq("entity", "orders").eq("entity_id", id);
   }
+  // a delivered order cannot be cancelled, so put stock / sold_count back by hand
+  for (const [id, values] of snapshot) await svc.from("books").update(values).eq("id", id);
+  if (promoCodeId) await svc.from("promo_codes").delete().eq("id", promoCodeId);
+  if (promotionId) await svc.from("promotions").delete().eq("id", promotionId);
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed ? 1 : 0);
 }

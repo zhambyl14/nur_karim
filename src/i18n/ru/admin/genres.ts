@@ -28,7 +28,7 @@ const genres: Dictionary["admin"]["genres"] = {
     createTitle: "Новая категория",
     editTitle: "Редактирование категории",
     nameKk: "Название (на казахском)",
-    nameKkPlaceholder: "Мысалы: Діни кітаптар",
+    nameKkPlaceholder: "Например: Діни кітаптар",
     nameRu: "Название (на русском)",
     nameRuPlaceholder: "Например: Религиозные книги",
     slug: "Ссылка (slug)",

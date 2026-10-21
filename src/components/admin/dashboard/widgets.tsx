@@ -378,8 +378,8 @@ export async function CityTable({ rows }: { rows: { label: string; orders: numbe
         </tr>
       </thead>
       <tbody>
-        {rows.map((r) => (
-          <tr key={r.label}>
+        {rows.map((r, i) => (
+          <tr key={`${i}-${r.label}`}>
             <Td className="text-ink">{r.label}</Td>
             <Td align="right">{formatNumber(r.orders)}</Td>
             <Td align="right" className="font-serif text-ink">

@@ -35,6 +35,7 @@ export function Hero({
 
   return (
     <section className="nk-hero-bg relative text-white">
+      <h1 className="sr-only">{t("home.meta.title")}</h1>
       <div className="nk-container relative grid items-center gap-10 pt-7 sm:pb-16 sm:pt-14 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:pb-20 lg:pt-20">
         <div className="min-w-0">
           {label && (

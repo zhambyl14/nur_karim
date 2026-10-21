@@ -8,6 +8,8 @@ import { formatDate, formatDateTime, formatPrice, storeDateKey } from "@/lib/for
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { ChipLink } from "@/components/ui/chip";
 import { Avatar, EmptyState, Pagination } from "@/components/ui/misc";
+import { interpolate } from "@/lib/i18n/translate";
+import { BOOK_LANGUAGE_LABELS, type BookLanguage } from "@/lib/constants";
 import type { Dictionary } from "@/i18n/kk";
 
 const PAGE_SIZE = 50;
@@ -62,17 +64,62 @@ function entityHref(entity: string, id: string | null): string | null {
   }
 }
 
-function formatValue(field: string, value: unknown, dict: Dictionary, locale: "kk" | "ru"): string {
-  const a = dict.admin.activity;
+type ValueContext = { dict: Dictionary; locale: "kk" | "ru"; genres: Map<string, string> };
+
+/** Codes stored in enum-like columns -> their UI labels */
+function enumLabel(field: string, value: string, { dict, locale }: ValueContext): string | undefined {
+  const pick = (map: Record<string, string>) => map[value];
+  switch (field) {
+    case "status":
+      return pick(dict.status.order);
+    case "cancel_reason":
+      return pick(dict.admin.orders.cancelReasons);
+    case "delivery_method":
+      return pick(dict.status.delivery);
+    case "discount_type":
+      return pick(dict.admin.promotions.common.discountTypes);
+    case "scope":
+      return pick(dict.admin.promotions.common.scopes);
+    case "format_scope":
+      return pick(dict.admin.promotions.common.formats);
+    case "cover_type":
+      return pick(dict.admin.books.form.coverTypes);
+    case "text_theme":
+      return value === "dark" ? dict.admin.banners.form.themeDark : dict.admin.banners.form.themeLight;
+    case "role":
+      return value === "admin" ? dict.admin.customers.admin : dict.admin.customers.client;
+    case "language":
+    case "locale":
+      return BOOK_LANGUAGE_LABELS[value as BookLanguage]?.[locale];
+    default:
+      return undefined;
+  }
+}
+
+/** Storage files (covers, banners, receipts) are shown as a marker, not as a long URL */
+const FILE_FIELD = /^(cover_url|image_url|image_mobile_url|payment_receipt_path)$/;
+
+function formatValue(field: string, value: unknown, ctx: ValueContext): string {
+  const a = ctx.dict.admin.activity;
   if (value === null || value === undefined || value === "") return a.empty_value;
   if (typeof value === "boolean") return value ? a.yes : a.no;
-  if (typeof value === "number" && /price|amount|total|threshold/.test(field)) return formatPrice(value);
-  if (field === "status" && typeof value === "string") {
-    return (dict.status.order as Record<string, string>)[value] ?? value;
+  if (typeof value === "number" && /price|amount|total|threshold|subtotal|_discount$/.test(field)) return formatPrice(value);
+  if (typeof value === "string") {
+    if (field === "genre_id") return ctx.genres.get(value) ?? a.empty_value;
+    if (FILE_FIELD.test(field)) return a.fileValue;
+    const label = enumLabel(field, value, ctx);
+    if (label) return label;
+    if (/^\d{4}-\d{2}-\d{2}T/.test(value)) return formatDateTime(value, ctx.locale);
   }
-  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value)) return formatDateTime(value, locale);
-  if (Array.isArray(value)) return value.length ? value.join(", ") : a.empty_value;
-  if (typeof value === "object") return JSON.stringify(value).slice(0, 80);
+  if (Array.isArray(value)) {
+    if (!value.length) return a.empty_value;
+    if (field === "images") return interpolate(a.imagesCount, { count: value.length });
+    return value.join(", ");
+  }
+  if (typeof value === "object") {
+    const parts = Object.values(value as Record<string, unknown>).filter((v) => typeof v === "string" && v.trim());
+    return parts.length ? parts.join(", ").slice(0, 120) : a.empty_value;
+  }
   return String(value);
 }
 
@@ -101,8 +148,18 @@ export default async function ActivityPage({
     .order("created_at", { ascending: false })
     .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
   if (entity) query = query.eq("entity", entity);
-  const { data, count } = await query;
+  const [{ data, count }, genresRes] = await Promise.all([query, supabase.from("genres").select("id, name_kk, name_ru")]);
   const rows = (data ?? []) as unknown as LogRow[];
+  const genres = new Map((genresRes.data ?? []).map((g) => [g.id, locale === "ru" ? g.name_ru : g.name_kk]));
+  // entitlement rows are labelled with the book id: show the book title instead
+  const entitlementBookIds = [...new Set(rows.filter((r) => r.entity === "entitlements" && r.entity_id).map((r) => r.entity_id!))];
+  const bookTitles = new Map<string, string>();
+  if (entitlementBookIds.length) {
+    const { data: books } = await supabase.from("books").select("id, title").in("id", entitlementBookIds);
+    for (const b of books ?? []) bookTitles.set(b.id, b.title);
+  }
+  const ctx: ValueContext = { dict, locale, genres };
+  const hidden = new Set(["payment_confirmed_by"]);
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   const a = dict.admin.activity;
@@ -154,7 +211,8 @@ export default async function ActivityPage({
                 {group.items.map((row) => {
                   const href = entityHref(row.entity, row.entity_id);
                   const entityName = (a.entities as Record<string, string>)[row.entity] ?? row.entity;
-                  const changes = Object.entries(row.changes ?? {});
+                  const changes = Object.entries(row.changes ?? {}).filter(([field]) => !hidden.has(field));
+                  const label = bookTitles.get(row.label) ?? row.label;
                   const shown = changes.slice(0, 4);
                   return (
                     <li key={row.id} className="flex gap-3 px-4 py-3.5 sm:px-5">
@@ -163,13 +221,19 @@ export default async function ActivityPage({
                         <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-sm">
                           <span className="font-bold text-ink">{row.actor?.full_name || row.actor?.phone || a.unknownActor}</span>
                           <span className="text-muted">{a.actions[row.action]}</span>
-                          <span className="text-muted">{entityName.toLocaleLowerCase(locale === "kk" ? "kk" : "ru")}</span>
-                          {href && row.action !== "delete" ? (
+                          {row.entity === "store_settings" && href ? (
                             <Link href={href} className="font-semibold text-wine-ink hover:underline">
-                              {row.entity === "store_settings" ? "" : row.label}
+                              {entityName.toLocaleLowerCase(locale === "kk" ? "kk" : "ru")}
                             </Link>
                           ) : (
-                            <span className="font-semibold text-ink-2">{row.entity === "store_settings" ? "" : row.label}</span>
+                            <span className="text-muted">{entityName.toLocaleLowerCase(locale === "kk" ? "kk" : "ru")}</span>
+                          )}
+                          {row.entity === "store_settings" ? null : href && row.action !== "delete" ? (
+                            <Link href={href} className="font-semibold text-wine-ink hover:underline">
+                              {label}
+                            </Link>
+                          ) : (
+                            <span className="font-semibold text-ink-2">{label}</span>
                           )}
                           <span className="ml-auto shrink-0 text-xs text-faint">{formatDateTime(row.created_at, locale)}</span>
                         </div>
@@ -179,9 +243,9 @@ export default async function ActivityPage({
                               <li key={field} className="max-w-full rounded-lg bg-subtle px-2.5 py-1 text-xs text-ink-2">
                                 <span className="font-semibold">{fieldLabel(field)}:</span>{" "}
                                 <span className="text-faint line-through decoration-faint/60">
-                                  {formatValue(field, pair?.[0], dict, locale)}
+                                  {formatValue(field, pair?.[0], ctx)}
                                 </span>{" "}
-                                → <span className="font-semibold text-ink">{formatValue(field, pair?.[1], dict, locale)}</span>
+                                → <span className="font-semibold text-ink">{formatValue(field, pair?.[1], ctx)}</span>
                               </li>
                             ))}
                             {changes.length > shown.length && (
@@ -202,7 +266,7 @@ export default async function ActivityPage({
             page={page}
             totalPages={totalPages}
             hrefForPage={hrefFor}
-            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next") }}
+            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next"), nav: t("common.pagination.label") }}
           />
         </div>
       )}

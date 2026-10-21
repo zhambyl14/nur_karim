@@ -45,8 +45,8 @@ export function BookPublishSwitch({ book, withLabel }: Props & { withLabel?: boo
         onChange={toggle}
         disabled={pending}
         label={withLabel ? t("admin.books.table.publishedSwitch") : undefined}
+        ariaLabel={withLabel ? undefined : `${t("admin.books.table.publishedSwitch")}: ${book.title}`}
       />
-      {!withLabel && <span className="sr-only">{t("admin.books.table.publishedSwitch")}</span>}
     </div>
   );
 }

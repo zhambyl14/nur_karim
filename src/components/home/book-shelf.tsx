@@ -8,7 +8,7 @@ import type { BookCardData } from "@/types/app";
 /**
  * Home section: Lora title + «Барлығын көру».
  * Phones: horizontal swipe row. Tablets/laptops: two full grid rows
- * (6 books on tablets, 8 on small laptops, 10 on wide screens).
+ * (up to 6 books on tablets, 8 on small laptops, 10 on wide screens; only full rows).
  */
 export function BookShelf({
   id,
@@ -28,6 +28,10 @@ export function BookShelf({
   priority?: boolean;
 }) {
   if (books.length === 0) return null;
+  // Tablets / laptops show only full grid rows (no lonely card on the last row)
+  const n = Math.min(books.length, 10);
+  const fullRows = (cols: number, max: number) => Math.min(max, n >= cols ? Math.floor(n / cols) * cols : n);
+  const [smMax, lgMax, xlMax] = [fullRows(3, 6), fullRows(4, 8), fullRows(5, 10)];
   return (
     <section aria-labelledby={id} className="nk-container">
       <SectionTitle
@@ -49,8 +53,9 @@ export function BookShelf({
             key={book.id}
             className={cn(
               "w-[46%] max-w-[200px] shrink-0 snap-start sm:w-auto sm:max-w-none",
-              i >= 6 && i < 8 && "sm:hidden lg:block",
-              i >= 8 && "sm:hidden xl:block",
+              i < smMax ? "sm:block" : "sm:hidden",
+              i < lgMax ? "lg:block" : "lg:hidden",
+              i < xlMax ? "xl:block" : "xl:hidden",
             )}
           >
             <BookCard book={book} priority={priority && i < 2} className="h-full" />

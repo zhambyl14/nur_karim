@@ -154,7 +154,7 @@ export default async function AdminMessagesPage({ searchParams }: { searchParams
             page={page}
             totalPages={totalPages}
             hrefForPage={(p) => qs({ page: p > 1 ? String(p) : null })}
-            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next") }}
+            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next"), nav: t("common.pagination.label") }}
           />
         </>
       )}

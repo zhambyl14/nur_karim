@@ -69,7 +69,7 @@ export default async function OrderPrintPage({ params }: Props) {
         <header className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-ink pb-4">
           <div>
             <div className="text-[11px] font-bold tracking-[.24em] text-muted">NUR KARIM</div>
-            <h1 className="mt-1 font-serif text-2xl font-semibold">{t("admin.orders.print.order", { number: order.order_number })}</h1>
+            <h2 className="mt-1 font-serif text-2xl font-semibold">{t("admin.orders.print.order", { number: order.order_number })}</h2>
           </div>
           <div className="text-right text-[13px]">
             <div>

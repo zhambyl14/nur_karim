@@ -233,7 +233,7 @@ export default async function AdminCustomersPage({
             page={page}
             totalPages={totalPages}
             hrefForPage={href}
-            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next") }}
+            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next"), nav: t("common.pagination.label") }}
           />
         </>
       )}

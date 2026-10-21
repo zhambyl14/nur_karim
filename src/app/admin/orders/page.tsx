@@ -172,7 +172,7 @@ export default async function AdminOrdersPage({
             page={filters.page}
             totalPages={totalPages}
             hrefForPage={(p) => href(orderFiltersQuery(filters, { page: p }))}
-            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next") }}
+            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next"), nav: t("common.pagination.label") }}
           />
         </>
       )}

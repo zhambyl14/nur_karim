@@ -35,6 +35,9 @@ export function BookCard({
   const original = format === "ebook" ? book.ebook_price : book.paper_price;
   const onlyEbook = !book.paper_enabled && book.ebook_available;
   const outOfStock = format === null;
+  // The badge must match the price shown on the card (discount_pct is the best over both formats).
+  const discountPct =
+    price !== null && original ? Math.max(0, Math.round((100 * (original - price)) / original)) : book.discount_pct;
 
   return (
     <article
@@ -54,7 +57,7 @@ export function BookCard({
           palette={book.cover_palette}
           size={compact ? "sm" : "md"}
           ebookBadge={book.ebook_available ? t("common.format.ebookBadge") : null}
-          discountPct={book.discount_pct}
+          discountPct={outOfStock ? book.discount_pct : discountPct}
           priority={priority}
         />
       </div>

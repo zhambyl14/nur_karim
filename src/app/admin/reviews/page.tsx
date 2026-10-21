@@ -95,7 +95,7 @@ export default async function AdminReviewsPage({
             page={page}
             totalPages={totalPages}
             hrefForPage={(p) => href(filter, p)}
-            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next") }}
+            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next"), nav: t("common.pagination.label") }}
           />
         </>
       )}

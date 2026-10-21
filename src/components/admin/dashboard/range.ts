@@ -3,7 +3,8 @@ import { storeDateKey } from "@/lib/format";
 /** Asia/Almaty has a fixed UTC+5 offset (no DST since 2024). */
 const OFFSET = "+05:00";
 const DAY_MS = 86_400_000;
-const MAX_DAYS = 365 * 3;
+/** admin_dashboard rejects ranges over interval '3 years' (Postgres counts that as 36 × 30 days) */
+const MAX_DAYS = 36 * 30;
 
 export const RANGE_PRESETS = ["today", "d7", "d30", "month", "lastMonth", "year", "custom"] as const;
 export type RangePreset = (typeof RANGE_PRESETS)[number];

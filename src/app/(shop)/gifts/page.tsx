@@ -17,7 +17,7 @@ import {
 import { getI18n } from "@/lib/i18n/server";
 import { getSettings } from "@/lib/data/common";
 import { searchBooks } from "@/lib/data/books";
-import { GIFT_CARD_THEMES } from "@/lib/constants";
+import { DEFAULT_OG_IMAGE, GIFT_CARD_THEMES } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
 import { buttonVariants } from "@/components/ui/button";
 import { SectionTitle } from "@/components/ui/card";
@@ -29,7 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("gift.landing.metaTitle"),
     description: t("gift.landing.metaDescription"),
-    openGraph: { title: t("gift.landing.metaTitle"), description: t("gift.landing.metaDescription") },
+    alternates: { canonical: "/gifts" },
+    openGraph: { title: t("gift.landing.metaTitle"), description: t("gift.landing.metaDescription"), images: [DEFAULT_OG_IMAGE] },
   };
 }
 

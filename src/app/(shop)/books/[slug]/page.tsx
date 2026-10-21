@@ -7,7 +7,7 @@ import { getSettings } from "@/lib/data/common";
 import { getSessionUserId } from "@/lib/auth";
 import { getI18n } from "@/lib/i18n/server";
 import { localized } from "@/lib/i18n/translate";
-import { BOOK_LANGUAGE_LABELS, type BookLanguage } from "@/lib/constants";
+import { BOOK_LANGUAGE_LABELS, DEFAULT_OG_IMAGE, type BookLanguage } from "@/lib/constants";
 import { env } from "@/lib/env";
 import { formatPrice } from "@/lib/format";
 import { RatingStars } from "@/components/ui/misc";
@@ -55,9 +55,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `/books/${book.slug}`,
       isbn: book.isbn ?? undefined,
       tags: book.tags,
-      images: book.cover_url ? [{ url: book.cover_url, alt: book.title }] : undefined,
+      images: book.cover_url ? [{ url: book.cover_url, alt: book.title }] : [DEFAULT_OG_IMAGE],
     },
-    twitter: { card: book.cover_url ? "summary_large_image" : "summary", title, description },
+    twitter: { card: book.cover_url ? "summary" : "summary_large_image", title, description, images: [book.cover_url ?? DEFAULT_OG_IMAGE.url] },
   };
 }
 

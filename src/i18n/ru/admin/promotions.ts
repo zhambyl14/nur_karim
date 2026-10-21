@@ -88,7 +88,7 @@ const promotions: Dictionary["admin"]["promotions"] = {
       danger: "Удаление акции",
     },
     titleKk: "Название (на казахском)",
-    titleKkPlaceholder: "Мысалы: Тарих апталығы",
+    titleKkPlaceholder: "Например: Тарих апталығы",
     titleRu: "Название (на русском)",
     titleRuPlaceholder: "Например: Неделя истории",
     titleHint: "Если русское название пустое, показывается казахское.",

@@ -81,7 +81,7 @@ export function AuthorsDirectory({ authors }: { authors: AuthorEntry[] }) {
           />
         </div>
       ) : (
-        <div className="mt-6 grid items-start gap-4 sm:mt-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 items-start gap-4 sm:mt-8 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((group) => (
             <section
               key={group.letter}

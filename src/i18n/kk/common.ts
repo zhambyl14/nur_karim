@@ -108,6 +108,7 @@ const common = {
     next: "Келесі",
     page: "{page}-бет",
     of: "{page} / {total}",
+    label: "Беттер",
   },
   a11y: {
     menu: "Мәзір",

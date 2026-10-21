@@ -222,6 +222,7 @@ export function Switch({
   description,
   disabled,
   id,
+  ariaLabel,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
@@ -229,6 +230,8 @@ export function Switch({
   description?: ReactNode;
   disabled?: boolean;
   id?: string;
+  /** accessible name when there is no visible label (or the label has no id to point at) */
+  ariaLabel?: string;
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
@@ -243,6 +246,7 @@ export function Switch({
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-label={ariaLabel ?? (!id && typeof label === "string" ? label : undefined)}
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(

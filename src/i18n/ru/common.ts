@@ -110,6 +110,7 @@ const common: Dictionary["common"] = {
     next: "Вперёд",
     page: "Страница {page}",
     of: "{page} из {total}",
+    label: "Страницы",
   },
   a11y: {
     menu: "Меню",

@@ -5,7 +5,7 @@ import { getI18n } from "@/lib/i18n/server";
 import { getProfile } from "@/lib/auth";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { env } from "@/lib/env";
-import { cityLabel } from "@/lib/constants";
+import { DEFAULT_OG_IMAGE, cityLabel } from "@/lib/constants";
 import { formatDateTime, orderNo } from "@/lib/format";
 import { formatPhone } from "@/lib/phone";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("gift.metaTitle"),
     description: t("gift.metaDescription"),
     robots: { index: false, follow: false },
-    openGraph: { title: t("gift.metaTitle"), description: t("gift.metaDescription") },
+    openGraph: { title: t("gift.metaTitle"), description: t("gift.metaDescription"), images: [DEFAULT_OG_IMAGE] },
   };
 }
 

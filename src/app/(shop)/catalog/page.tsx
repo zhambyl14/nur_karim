@@ -104,7 +104,7 @@ export default async function CatalogPage({ searchParams }: Props) {
                 page={page}
                 totalPages={totalPages}
                 hrefForPage={(p) => catalogHref(params, { page: p })}
-                labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next") }}
+                labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next"), nav: t("common.pagination.label") }}
               />
               {totalPages > 1 && (
                 <p className="mt-3 text-center text-xs font-semibold text-faint">

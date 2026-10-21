@@ -257,3 +257,7 @@ export function cityLabel(value: string | null | undefined, locale: "kk" | "ru")
   }
   return value;
 }
+
+/** Site-wide share image (app/opengraph-image.png). Pages that set their own
+ * `openGraph` replace the inherited image, so they add this one back. */
+export const DEFAULT_OG_IMAGE = { url: "/opengraph-image.png", width: 1200, height: 630, alt: "Nur Karim" } as const;

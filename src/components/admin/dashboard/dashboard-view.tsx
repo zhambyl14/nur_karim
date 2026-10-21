@@ -72,7 +72,14 @@ export async function DashboardView({ range, counters }: { range: DashboardRange
     revenue: c.revenue,
   }));
 
-  const genresSorted = [...data.by_genre].sort((a, b) => b.revenue - a.revenue);
+  // order items keep the genre id of the sale; deleted genres (no names) collapse into one «no genre» slice
+  const genreMap = new Map<string, DashboardData["by_genre"][number]>();
+  for (const g of data.by_genre) {
+    const key = g.name_kk || g.name_ru ? (g.genre_id ?? "") : "__none";
+    const prev = genreMap.get(key);
+    genreMap.set(key, prev ? { ...prev, units: prev.units + g.units, revenue: prev.revenue + g.revenue } : g);
+  }
+  const genresSorted = [...genreMap.values()].sort((a, b) => b.revenue - a.revenue);
   const topGenres = genresSorted.slice(0, 7);
   const rest = genresSorted.slice(7);
   const genreSlices = topGenres.map((g, i) => ({
@@ -142,8 +149,8 @@ export async function DashboardView({ range, counters }: { range: DashboardRange
             <>
               <DonutChart data={genreSlices} centerLabel={t("admin.dashboard.charts.total")} centerValue={formatPrice(genreTotal)} />
               <ul className="mt-5 space-y-2">
-                {genreSlices.map((g) => (
-                  <li key={g.label} className="flex items-center gap-2.5 text-[13px]">
+                {genreSlices.map((g, i) => (
+                  <li key={`${i}-${g.label}`} className="flex items-center gap-2.5 text-[13px]">
                     <span className="size-2.5 shrink-0 rounded-full" style={{ background: g.fill }} aria-hidden />
                     <span className="min-w-0 flex-1 truncate font-semibold text-ink-2">{g.label}</span>
                     <span className="shrink-0 text-xs font-semibold text-muted">{Math.round((g.value / genreTotal) * 100)}%</span>

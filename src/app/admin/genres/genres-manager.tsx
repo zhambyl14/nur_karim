@@ -295,7 +295,7 @@ export function GenresManager({ genres }: { genres: AdminGenre[] }) {
                         active ? t("admin.genres.toasts.shown") : t("admin.genres.toasts.hidden"),
                       )
                     }
-                    label={<span className="sr-only">{t("admin.genres.modal.active")}</span>}
+                    ariaLabel={`${t("admin.genres.modal.active")}: ${name}`}
                   />
                 </div>
                 <div className="flex shrink-0 items-center gap-1">

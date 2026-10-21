@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
 import { esc, sendTelegramMessage, isTelegramConfigured } from "@/lib/telegram";
-import { formatDate, formatPrice, STORE_TIMEZONE } from "@/lib/format";
+import { formatDate, formatPrice, storeDateKey, STORE_TIMEZONE } from "@/lib/format";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -44,7 +44,7 @@ async function sendDailySummary() {
   const [{ data: settings }, { data: admins }, { data: todays }, { data: open }, { count: lowStock }, { data: convs }] =
     await Promise.all([
       admin.from("store_settings").select("telegram_notify_admins").eq("id", 1).maybeSingle(),
-      admin.from("profiles").select("telegram_id, locale").eq("role", "admin").not("telegram_id", "is", null),
+      admin.from("profiles").select("id, telegram_id, locale").eq("role", "admin").not("telegram_id", "is", null),
       admin.from("orders").select("status, total").gte("created_at", from.toISOString()),
       admin.from("orders").select("status, has_paper").in("status", ["pending_payment", "payment_review", "paid"]),
       admin
@@ -68,7 +68,10 @@ async function sendDailySummary() {
   const unread = (convs ?? []).reduce((sum, c) => sum + c.admin_unread, 0);
 
   let sent = 0;
+  const day = storeDateKey(new Date());
   for (const a of admins) {
+    // Vercel may deliver a cron more than once: claim the (admin, day) slot first
+    if (!(await claimNotification(admin, a.id, "daily_summary", day))) continue;
     const ru = a.locale === "ru";
     const lines = ru
       ? [
@@ -99,6 +102,7 @@ async function sendDailySummary() {
       [{ text: ru ? "Открыть админ-панель" : "Админ панеліне өту", url: `${env.siteUrl}/admin` }],
     ]);
     if (ok) sent++;
+    else await releaseNotification(admin, a.id, "daily_summary", day);
   }
   return { sent };
 }
@@ -132,7 +136,7 @@ async function sendCartReminders() {
   for (const [userId, cart] of byUser) {
     if (cart.latest > olderThan) continue; // edited within the last 24 h
 
-    const [{ data: profile }, { count: ordersSince }, { count: reminded }] = await Promise.all([
+    const [{ data: profile }, { count: ordersSince }, { count: reminded, error: logError }] = await Promise.all([
       admin.from("profiles").select("telegram_id, locale, full_name").eq("id", userId).maybeSingle(),
       admin.from("orders").select("id", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", cart.latest),
       admin
@@ -142,7 +146,9 @@ async function sendCartReminders() {
         .eq("kind", "cart_reminder")
         .gte("created_at", new Date(now - 7 * 24 * 3600_000).toISOString()),
     ]);
-    if (!profile?.telegram_id || (ordersSince ?? 0) > 0 || (reminded ?? 0) > 0) continue;
+    if (logError || !profile?.telegram_id || (ordersSince ?? 0) > 0 || (reminded ?? 0) > 0) continue;
+    const ref = cart.latest.slice(0, 10);
+    if (!(await claimNotification(admin, userId, "cart_reminder", ref))) continue;
 
     const ru = profile.locale === "ru";
     const titles = cart.titles.slice(0, 3).map((t) => `• ${esc(t)}`).join("\n");
@@ -153,10 +159,21 @@ async function sendCartReminders() {
     const ok = await sendTelegramMessage(profile.telegram_id, text, [
       [{ text: ru ? "Перейти в корзину" : "Себетке өту", url: `${env.siteUrl}/cart` }],
     ]);
-    if (ok) {
-      await admin.from("notification_log").insert({ user_id: userId, kind: "cart_reminder", ref: cart.latest.slice(0, 10) });
-      sent++;
-    }
+    if (ok) sent++;
+    else await releaseNotification(admin, userId, "cart_reminder", ref);
   }
   return { sent };
+}
+
+type AdminClient = ReturnType<typeof createSupabaseAdmin>;
+
+/** Inserts the dedupe row (unique on user, kind, ref); false when it already exists. */
+async function claimNotification(admin: AdminClient, userId: string, kind: string, ref: string): Promise<boolean> {
+  const { error } = await admin.from("notification_log").insert({ user_id: userId, kind, ref });
+  return !error;
+}
+
+/** Frees the slot again when Telegram did not accept the message, so the next run retries. */
+async function releaseNotification(admin: AdminClient, userId: string, kind: string, ref: string) {
+  await admin.from("notification_log").delete().eq("user_id", userId).eq("kind", kind).eq("ref", ref);
 }

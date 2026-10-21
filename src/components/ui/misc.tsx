@@ -141,7 +141,7 @@ export function Pagination({
   page: number;
   totalPages: number;
   hrefForPage: (page: number) => string;
-  labels: { prev: string; next: string };
+  labels: { prev: string; next: string; nav?: string };
   className?: string;
 }) {
   if (totalPages <= 1) return null;
@@ -149,7 +149,7 @@ export function Pagination({
   const sorted = [...pages].sort((a, b) => a - b);
   const item = "grid h-10 min-w-10 place-items-center rounded-xl px-3 text-sm font-bold transition";
   return (
-    <nav className={cn("flex items-center justify-center gap-1.5", className)} aria-label="pagination">
+    <nav className={cn("flex items-center justify-center gap-1.5", className)} aria-label={labels.nav}>
       {page > 1 ? (
         <Link href={hrefForPage(page - 1)} className={cn(item, "border border-line bg-card text-ink hover:bg-subtle")} aria-label={labels.prev}>
           <ChevronLeft className="size-4" />

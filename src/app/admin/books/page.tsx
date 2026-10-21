@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { BookOpen, Download, Plus } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseServer } from "@/lib/supabase/server";
@@ -110,6 +111,8 @@ export default async function AdminBooksPage({ searchParams }: { searchParams: S
     const qs = params.toString();
     return qs ? `/admin/books?${qs}` : "/admin/books";
   };
+  // A page past the end (e.g. the last book of the last page was deleted) is a range error: go to page 1.
+  if (list.error && page > 1) redirect(hrefFor({ page: null }));
 
   const tiles = [
     { label: t("admin.books.summary.total"), value: totalCount, href: "/admin/books", active: !anyFilter },
@@ -228,7 +231,7 @@ export default async function AdminBooksPage({ searchParams }: { searchParams: S
             page={page}
             totalPages={totalPages}
             hrefForPage={(p) => hrefFor({ page: p > 1 ? String(p) : null })}
-            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next") }}
+            labels={{ prev: t("common.pagination.prev"), next: t("common.pagination.next"), nav: t("common.pagination.label") }}
           />
         </>
       )}
