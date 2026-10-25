@@ -28,7 +28,7 @@ function toValues(s: StoreSettings): Values {
     instagram_url: str(s.instagram_url),
     telegram_url: str(s.telegram_url),
     whatsapp_phone: str(s.whatsapp_phone),
-    payment_phone: s.payment_phone,
+    payment_card: s.payment_card,
     payment_recipient: s.payment_recipient,
     payment_bank: s.payment_bank,
     payment_note_kk: s.payment_note_kk,
@@ -209,7 +209,7 @@ export function SettingsForm({
 
         <Section id="sec-payment" title={t("admin.settings.sections.payment")} hint={t("admin.settings.sections.paymentHint")}>
           <div className="grid gap-4 sm:grid-cols-2">
-            {text("payment_phone", "admin.settings.fields.paymentPhone", { required: true, type: "tel", inputMode: "tel" })}
+            {text("payment_card", "admin.settings.fields.paymentCard", { required: true, inputMode: "numeric", placeholder: "4400 0000 0000 0000", hint: "admin.settings.fields.paymentCardHint" })}
             {text("payment_bank", "admin.settings.fields.paymentBank", { required: true })}
             {text("payment_recipient", "admin.settings.fields.paymentRecipient", {
               hint: "admin.settings.fields.paymentRecipientHint",

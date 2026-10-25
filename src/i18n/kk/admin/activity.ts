@@ -67,7 +67,7 @@ const activity = {
     sort_order: "Реті",
     delivery_astana_price: "Астана жеткізу бағасы",
     delivery_kazpost_price: "Қазпошта бағасы",
-    payment_phone: "Төлем нөмірі",
+    payment_card: "Төлем картасы",
     cover_palette: "Мұқаба түсі",
     cover_type: "Мұқаба түрі",
     images: "Галерея",

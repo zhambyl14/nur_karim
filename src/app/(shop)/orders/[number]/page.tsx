@@ -164,7 +164,7 @@ export default async function OrderPage({ params, searchParams }: Props) {
               status={status}
               amount={order.total}
               payment={{
-                phone: settings.payment_phone,
+                card: settings.payment_card,
                 bank: settings.payment_bank,
                 recipient: settings.payment_recipient,
                 note: localized(settings, "payment_note", locale),

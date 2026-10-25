@@ -69,7 +69,7 @@ const activity: Dictionary["admin"]["activity"] = {
     sort_order: "Порядок",
     delivery_astana_price: "Доставка по Астане",
     delivery_kazpost_price: "Казпочта",
-    payment_phone: "Номер для оплаты",
+    payment_card: "Карта для оплаты",
     cover_palette: "Цвет обложки",
     cover_type: "Тип обложки",
     images: "Галерея",

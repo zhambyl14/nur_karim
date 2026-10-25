@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatCard, normalizeCard } from "@/lib/format";
 import { formatPhone, isValidPhone } from "@/lib/phone";
 
 /**
@@ -15,6 +16,12 @@ const phone = z
   .trim()
   .refine((v) => isValidPhone(v), { message: "phone" })
   .transform((v) => formatPhone(v));
+
+const card = z
+  .string()
+  .trim()
+  .refine((v) => /^[\d\s]+$/.test(v) && normalizeCard(v).length >= 13 && normalizeCard(v).length <= 19, { message: "card" })
+  .transform((v) => formatCard(v));
 
 const optionalPhone = z
   .string()
@@ -60,7 +67,7 @@ export const settingsSchema = z.object({
   telegram_url: optionalUrl,
   whatsapp_phone: optionalPhone,
 
-  payment_phone: phone,
+  payment_card: card,
   payment_recipient: text(80),
   payment_bank: required(60),
   payment_note_kk: text(1000),

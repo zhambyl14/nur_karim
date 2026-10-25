@@ -6,8 +6,7 @@ import { z } from "zod";
 import { getProfile } from "@/lib/auth";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getSettings } from "@/lib/data/common";
-import { formatPrice, orderNo } from "@/lib/format";
-import { formatPhone } from "@/lib/phone";
+import { formatCard, formatPrice, orderNo } from "@/lib/format";
 import { esc, notifyUser } from "@/lib/telegram";
 import { GIFT_CARD_THEMES } from "@/lib/constants";
 import {
@@ -122,7 +121,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
           t("orders.telegram.clientNew", {
             number: orderNo(orderNumber),
             amount: formatPrice(result.total),
-            phone: esc(formatPhone(settings.payment_phone) || settings.payment_phone),
+            card: esc(formatCard(settings.payment_card) || settings.payment_card),
             bank: esc(settings.payment_bank),
             recipient: settings.payment_recipient
               ? t("orders.telegram.recipientLine", { name: esc(settings.payment_recipient) })

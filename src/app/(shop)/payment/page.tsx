@@ -3,7 +3,7 @@ import { Landmark, ShieldCheck, TicketPercent, Timer } from "lucide-react";
 import { getSettings } from "@/lib/data/common";
 import { getI18n } from "@/lib/i18n/server";
 import { localized } from "@/lib/i18n/translate";
-import { formatPhone, normalizePhone } from "@/lib/phone";
+import { formatCard, normalizeCard } from "@/lib/format";
 import { CopyButton } from "@/components/ui/interactive";
 import { IconBadge, InfoCard, InfoLayout, InfoSteps } from "@/components/home/info";
 
@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PaymentPage() {
   const [{ t, locale }, settings] = await Promise.all([getI18n(), getSettings()]);
-  const phone = settings.payment_phone?.trim() ?? "";
+  const card = settings.payment_card?.trim() ?? "";
   const note = localized(settings, "payment_note", locale).trim();
 
   const details = [
@@ -35,13 +35,13 @@ export default async function PaymentPage() {
             <Landmark className="size-6 text-gold" aria-hidden />
             {t("info.payment.details.title")}
           </h2>
-          {phone && (
+          {card && (
             <div className="relative mt-5">
-              <div className="text-[11px] font-bold uppercase tracking-[.18em] text-white/55">{t("info.payment.details.phone")}</div>
+              <div className="text-[11px] font-bold uppercase tracking-[.18em] text-white/55">{t("info.payment.details.card")}</div>
               <div className="mt-1 flex flex-wrap items-center gap-3">
-                <span className="font-serif text-[28px] font-semibold tracking-wide sm:text-[32px]">{formatPhone(phone)}</span>
+                <span className="font-serif text-[28px] font-semibold tracking-wide sm:text-[32px]">{formatCard(card)}</span>
                 <CopyButton
-                  value={normalizePhone(phone) ?? phone}
+                  value={normalizeCard(card)}
                   label={t("info.payment.details.copy")}
                   variant="soft"
                 />

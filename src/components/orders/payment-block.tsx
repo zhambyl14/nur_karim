@@ -7,8 +7,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/client";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 import { MAX_RECEIPT_BYTES } from "@/lib/constants";
-import { formatPrice, orderNo } from "@/lib/format";
-import { formatPhone } from "@/lib/phone";
+import { formatCard, formatPrice, normalizeCard, orderNo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/interactive";
@@ -38,7 +37,7 @@ export function PaymentBlock({
   userId: string;
   status: "pending_payment" | "payment_review";
   amount: number;
-  payment: { phone: string; bank: string; recipient: string; note: string };
+  payment: { card: string; bank: string; recipient: string; note: string };
   /** when the unpaid order is auto-cancelled (formatted), null = never */
   deadline: string | null;
   receipt: { url: string; pdf: boolean } | null;
@@ -131,7 +130,7 @@ export function PaymentBlock({
       )}
 
       <dl className="divide-y divide-line px-5 sm:px-6">
-        <PayRow label={t("orders.payment.phone")} value={formatPhone(payment.phone) || payment.phone} copy={payment.phone} copyLabel={t("orders.payment.copyPhone")} big />
+        <PayRow label={t("orders.payment.card")} value={formatCard(payment.card) || payment.card} copy={normalizeCard(payment.card) || payment.card} copyLabel={t("orders.payment.copyCard")} big />
         {payment.bank && <PayRow label={t("orders.payment.bank")} value={payment.bank} />}
         {payment.recipient && <PayRow label={t("orders.payment.recipient")} value={payment.recipient} />}
         <PayRow

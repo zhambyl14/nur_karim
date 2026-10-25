@@ -181,3 +181,13 @@ export function relativeTime(
 export function orderNo(n: number | string): string {
   return `#${n}`;
 }
+
+/** Card number digits only: "4400 4301 2345 6789" -> "4400430123456789" */
+export function normalizeCard(value: string | null | undefined): string {
+  return (value ?? "").replace(/\D/g, "");
+}
+
+/** Card number for display in groups of four: "4400 4301 2345 6789" */
+export function formatCard(value: string | null | undefined): string {
+  return normalizeCard(value).replace(/(.{4})(?=.)/g, "$1 ");
+}

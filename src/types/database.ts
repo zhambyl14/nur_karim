@@ -1436,9 +1436,9 @@ export type Database = {
           instagram_url: string | null
           order_auto_cancel_hours: number
           payment_bank: string
+          payment_card: string
           payment_note_kk: string
           payment_note_ru: string
-          payment_phone: string
           payment_recipient: string
           store_name: string
           telegram_notify_admins: boolean
@@ -1469,9 +1469,9 @@ export type Database = {
           instagram_url?: string | null
           order_auto_cancel_hours?: number
           payment_bank?: string
+          payment_card?: string
           payment_note_kk?: string
           payment_note_ru?: string
-          payment_phone?: string
           payment_recipient?: string
           store_name?: string
           telegram_notify_admins?: boolean
@@ -1502,9 +1502,9 @@ export type Database = {
           instagram_url?: string | null
           order_auto_cancel_hours?: number
           payment_bank?: string
+          payment_card?: string
           payment_note_kk?: string
           payment_note_ru?: string
-          payment_phone?: string
           payment_recipient?: string
           store_name?: string
           telegram_notify_admins?: boolean
