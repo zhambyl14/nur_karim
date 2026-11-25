@@ -20,12 +20,6 @@ export async function ActiveFilters({ params, genres }: { params: CatalogParams;
       label: genre ? (locale === "ru" ? genre.name_ru : genre.name_kk) : params.genre,
       href: catalogHref(params, { genre: undefined }),
     });
-  if (params.format)
-    chips.push({
-      key: "format",
-      label: params.format === "ebook" ? t("catalog.filters.formatEbook") : t("catalog.filters.formatPaper"),
-      href: catalogHref(params, { format: undefined }),
-    });
   if (params.author) chips.push({ key: "author", label: params.author, href: catalogHref(params, { author: undefined }) });
   if (params.language)
     chips.push({

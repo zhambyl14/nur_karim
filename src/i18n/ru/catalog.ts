@@ -9,6 +9,11 @@ const catalog: Dictionary["catalog"] = {
     titleAuthor: "Книги автора {author}",
   },
   title: "Каталог",
+  tabs: {
+    label: "Тип книги",
+    books: "Книги",
+    ebooks: "Е-книги",
+  },
   titleEbooks: "Электронные книги",
   titleAuthor: "{author}",
   count: "{count} книга|{count} книги|{count} книг",

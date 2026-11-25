@@ -33,11 +33,6 @@ function FilterFields({
 }) {
   const { t, locale } = useI18n();
   const id = useId();
-  const formats: { value: CatalogParams["format"]; label: string }[] = [
-    { value: undefined, label: t("catalog.filters.formatAll") },
-    { value: "paper", label: t("catalog.filters.formatPaper") },
-    { value: "ebook", label: t("catalog.filters.formatEbook") },
-  ];
 
   const onPriceSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -46,39 +41,6 @@ function FilterFields({
 
   return (
     <div className="flex flex-col divide-y divide-line-soft [&>*]:py-5 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
-      <fieldset>
-        <legend className="float-left mb-3 w-full text-[11px] font-bold uppercase tracking-[.12em] text-muted">{t("catalog.filters.format")}</legend>
-        <div className="clear-both flex flex-col gap-1.5">
-          {formats.map((f) => {
-            const checked = value.format === f.value;
-            return (
-              <label
-                key={f.value ?? "all"}
-                className={cn(
-                  "flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-gold",
-                  checked ? "border-wine-line bg-wine-soft text-ink" : "border-line bg-card text-ink-2 hover:border-line-strong hover:bg-card-2",
-                )}
-              >
-                <input
-                  type="radio"
-                  name={`${id}-format`}
-                  className="sr-only"
-                  checked={checked}
-                  onChange={() => onChange({ format: f.value }, true)}
-                />
-                <span
-                  aria-hidden
-                  className={cn("grid size-[18px] shrink-0 place-items-center rounded-full border-2 bg-card transition", checked ? "border-wine" : "border-line-strong")}
-                >
-                  {checked && <span className="size-2 rounded-full bg-wine" />}
-                </span>
-                {f.label}
-              </label>
-            );
-          })}
-        </div>
-      </fieldset>
-
       <fieldset>
         <legend className="float-left mb-3 w-full text-[11px] font-bold uppercase tracking-[.12em] text-muted">{t("catalog.filters.price")}</legend>
         <form onSubmit={onPriceSubmit} className="clear-both flex flex-col gap-2.5">
@@ -205,7 +167,7 @@ export function DesktopFilters({ params }: { params: CatalogParams }) {
         </h2>
         {active > 0 && (
           <Link
-            href={catalogHref({ q: params.q, genre: params.genre, sort: params.sort })}
+            href={catalogHref({ q: params.q, genre: params.genre, sort: params.sort, format: params.format })}
             scroll={false}
             className="rounded-md px-1.5 py-1 text-xs font-bold text-wine-ink hover:underline"
           >
@@ -239,7 +201,7 @@ export function MobileFilters({ params, className }: { params: CatalogParams; cl
   };
 
   const reset = () =>
-    setDraft({ q: params.q, genre: params.genre, sort: params.sort });
+    setDraft({ q: params.q, genre: params.genre, sort: params.sort, format: params.format });
 
   return (
     <>

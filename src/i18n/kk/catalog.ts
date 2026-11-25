@@ -7,6 +7,11 @@ const catalog = {
     titleAuthor: "{author} кітаптары",
   },
   title: "Каталог",
+  tabs: {
+    label: "Кітап түрі",
+    books: "Кітаптар",
+    ebooks: "Е-кітаптар",
+  },
   titleEbooks: "Электронды кітаптар",
   titleAuthor: "{author}",
   count: "{count} кітап",

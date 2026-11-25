@@ -51,7 +51,8 @@ export function parseCatalogParams(raw: RawSearchParams): CatalogParams {
   return {
     q: first(raw.q)?.slice(0, 100),
     genre: first(raw.genre)?.slice(0, 80),
-    format: format === "paper" || format === "ebook" ? format : undefined,
+    // the catalog shows one kind at a time: no format = paper books, "ebook" = e-books
+    format: format === "ebook" ? "ebook" : undefined,
     author: first(raw.author)?.slice(0, 160),
     language: (BOOK_LANGUAGES as readonly string[]).includes(language ?? "") ? (language as BookLanguage) : undefined,
     sale: flag(raw.sale),
@@ -86,7 +87,6 @@ export function catalogHref(params: CatalogParams, overrides: Partial<CatalogPar
 /** Number of panel filters in use (search, genre and sort are not counted) */
 export function countPanelFilters(p: CatalogParams): number {
   return [
-    p.format,
     p.author,
     p.language,
     p.sale,
