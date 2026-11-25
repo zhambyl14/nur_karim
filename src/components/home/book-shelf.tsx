@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { BookCard } from "@/components/book/book-card";
+import { BookCard, type CardFormat } from "@/components/book/book-card";
 import { SectionTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { BookCardData } from "@/types/app";
@@ -20,6 +20,7 @@ export function BookShelf({
   linkLabel,
   books,
   priority,
+  only,
 }: {
   id: string;
   title: string;
@@ -30,6 +31,8 @@ export function BookShelf({
   linkLabel: string;
   books: BookCardData[];
   priority?: boolean;
+  /** cards show only this format */
+  only?: CardFormat;
 }) {
   if (books.length === 0) return null;
   // Tablets / laptops show only full grid rows (no lonely card on the last row)
@@ -63,7 +66,7 @@ export function BookShelf({
               i < xlMax ? "xl:block" : "xl:hidden",
             )}
           >
-            <BookCard book={book} priority={priority && i < 2} className="h-full" />
+            <BookCard book={book} priority={priority && i < 2} className="h-full" only={only} />
           </li>
         ))}
       </ul>

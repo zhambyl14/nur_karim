@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { MapPin, Phone } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { InstagramIcon, TelegramIcon, WhatsappIcon } from "@/components/brand/social-icons";
 import { getI18n } from "@/lib/i18n/server";
 import { localized } from "@/lib/i18n/translate";
 import { getSettings } from "@/lib/data/common";
 import { formatPrice } from "@/lib/format";
-import { phoneHref, whatsappHref } from "@/lib/phone";
+import { whatsappHref } from "@/lib/phone";
 import { Logo } from "@/components/brand/logo";
 import { LocaleSwitch } from "@/components/layout/controls";
 
@@ -55,13 +55,6 @@ export async function SiteFooter() {
                 <WhatsappIcon size={18} />
                 {t("nav.footer.whatsapp")}
               </a>
-              <a
-                href={phoneHref(settings.contact_phone)}
-                aria-label={settings.contact_phone}
-                className="grid size-11 shrink-0 place-items-center rounded-xl border border-white/20 text-white transition hover:bg-white/10"
-              >
-                <Phone className="size-[18px]" aria-hidden />
-              </a>
             </div>
           </div>
         </div>
@@ -90,11 +83,6 @@ export async function SiteFooter() {
         <div className="col-span-2 md:col-span-1">
           <h3 className="mb-4 text-[11px] font-bold uppercase tracking-[.16em] text-gold">{t("nav.footer.contacts")}</h3>
           <ul className="space-y-1 text-[13px] font-medium">
-            <li>
-              <a href={phoneHref(settings.contact_phone)} className="-mx-1 inline-flex min-h-10 items-center gap-2.5 rounded-lg px-1 font-serif text-[17px] font-semibold text-white transition hover:text-gold">
-                <Phone className="size-4 text-gold" aria-hidden /> {settings.contact_phone}
-              </a>
-            </li>
             {address && (
               <li className="flex items-start gap-2.5 py-1.5">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden /> {address}

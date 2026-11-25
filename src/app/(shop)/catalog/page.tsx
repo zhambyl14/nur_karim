@@ -132,7 +132,7 @@ export default async function CatalogPage({ searchParams }: Props) {
         <section aria-label={t("catalog.results")} className="min-w-0">
           {items.length > 0 ? (
             <>
-              <BookGrid books={items} priorityCount={4} className="lg:grid-cols-3 xl:grid-cols-4" />
+              <BookGrid books={items} priorityCount={4} only={params.format} className="lg:grid-cols-3 xl:grid-cols-4" />
               <Pagination
                 className="mt-10"
                 page={page}

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Mail, MapPin, MessagesSquare, Phone } from "lucide-react";
+import { ArrowUpRight, Mail, MapPin, MessagesSquare } from "lucide-react";
 import { getSettings } from "@/lib/data/common";
 import { getI18n } from "@/lib/i18n/server";
 import { localized } from "@/lib/i18n/translate";
-import { formatPhone, phoneHref, whatsappHref } from "@/lib/phone";
+import { formatPhone, whatsappHref } from "@/lib/phone";
 import { InstagramIcon, TelegramIcon, WhatsappIcon } from "@/components/brand/social-icons";
 import { buttonVariants } from "@/components/ui/button";
 import { IconBadge, InfoCard, InfoLayout } from "@/components/home/info";
@@ -40,17 +40,6 @@ export default async function ContactsPage() {
   const address = localized(settings, "address", locale).trim() || t("info.contacts.city");
 
   const items: ContactItem[] = [];
-  if (settings.contact_phone && phoneHref(settings.contact_phone)) {
-    items.push({
-      key: "phone",
-      icon: <Phone className="size-5" aria-hidden />,
-      label: t("info.contacts.phone"),
-      value: formatPhone(settings.contact_phone),
-      href: phoneHref(settings.contact_phone),
-      action: t("info.contacts.call"),
-      external: false,
-    });
-  }
   if (settings.whatsapp_phone && whatsappHref(settings.whatsapp_phone)) {
     items.push({
       key: "whatsapp",

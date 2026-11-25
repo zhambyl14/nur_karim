@@ -11,6 +11,7 @@ import { Hero } from "@/components/home/hero";
 import { BannerCarousel, type HomeBanner } from "@/components/home/banner-carousel";
 import { BookShelf } from "@/components/home/book-shelf";
 import { GenreGrid } from "@/components/home/genre-grid";
+import { EbookShowcase } from "@/components/home/ebook-showcase";
 import { EbookPromo, GiftPromo, HowToOrder, ValueProps } from "@/components/home/promos";
 import type { BookCardData } from "@/types/app";
 
@@ -115,10 +116,11 @@ export default async function HomePage() {
     getGenres(),
     getActiveBanners(locale),
     getGenreCounts(),
-    searchBooks({ sort: "new", pageSize: 10 }),
-    searchBooks({ sale: true, sort: "popular", pageSize: 10 }),
-    searchBooks({ format: "ebook", sort: "popular", pageSize: 10 }),
-    searchBooks({ featured: true, sort: "popular", pageSize: 10 }),
+    // paper shelves and the e-book showcase never share books: each shows one format only
+    searchBooks({ format: "paper", sort: "new", pageSize: 10 }),
+    searchBooks({ format: "paper", sale: true, sort: "popular", pageSize: 10 }),
+    searchBooks({ format: "ebook", sort: "popular", pageSize: 8 }),
+    searchBooks({ format: "paper", featured: true, sort: "popular", pageSize: 10 }),
   ]);
 
   // Two biggest genres get their own shelves
@@ -131,12 +133,12 @@ export default async function HomePage() {
     .filter((slug) => (genreCounts[slug] ?? 0) >= 4)
     .sort((a, b) => (genreCounts[b] ?? 0) - (genreCounts[a] ?? 0))
     .slice(0, 2);
-  const genreShelves = await Promise.all(topGenres.map((slug) => searchBooks({ genre: slug, sort: "popular", pageSize: 10 })));
+  const genreShelves = await Promise.all(topGenres.map((slug) => searchBooks({ genre: slug, format: "paper", sort: "popular", pageSize: 10 })));
 
   const bookOfWeek = featured.items[0] ?? newBooks.items[0] ?? null;
   const covers = pickCovers(uniqueBooks([bookOfWeek ? [bookOfWeek] : [], featured.items, newBooks.items], 30));
   const giftBook = featured.items.find((b) => b.cover_url && b.id !== bookOfWeek?.id) ?? featured.items[1] ?? null;
-  const catalogEmpty = newBooks.total === 0;
+  const catalogEmpty = newBooks.total === 0 && ebooks.total === 0;
   const quickLinks = [...genres]
     .sort((a, b) => (genreCounts[b.slug] ?? 0) - (genreCounts[a.slug] ?? 0))
     .slice(0, 4)
@@ -194,6 +196,7 @@ export default async function HomePage() {
                 href="/catalog?sort=popular"
                 linkLabel={t("home.sections.showAll")}
                 books={featured.items}
+                only="paper"
                 priority
               />
             )}
@@ -204,8 +207,10 @@ export default async function HomePage() {
               href="/catalog?sort=new"
               linkLabel={t("home.sections.showAll")}
               books={newBooks.items}
+              only="paper"
               priority={featured.items.length < 3}
             />
+            {ebooks.items.length > 0 && <EbookShowcase t={t} books={ebooks.items} total={ebooks.total} />}
             <BookShelf
               id="home-sale"
               eyebrow={t("home.sections.saleEyebrow")}
@@ -214,6 +219,7 @@ export default async function HomePage() {
               href="/catalog?sale=1"
               linkLabel={t("home.sections.showAll")}
               books={sale.items}
+              only="paper"
             />
             {settings.gift_enabled && <GiftPromo t={t} book={giftBook} />}
             {topGenres.map((slug, i) => (
@@ -226,24 +232,14 @@ export default async function HomePage() {
                 href={`/catalog?genre=${encodeURIComponent(slug)}`}
                 linkLabel={t("home.sections.showAll")}
                 books={genreShelves[i].items}
+                only="paper"
               />
             ))}
-            {ebooks.items.length >= 3 && (
-              <BookShelf
-                id="home-ebooks"
-                eyebrow={t("home.sections.ebooksEyebrow")}
-                title={t("home.sections.ebooks")}
-                meta={t("catalog.count", { count: ebooks.total })}
-                href="/catalog?format=ebook"
-                linkLabel={t("home.sections.showAll")}
-                books={ebooks.items}
-              />
-            )}
           </>
         )}
 
         <HowToOrder t={t} settings={settings} />
-        <EbookPromo t={t} count={stats.ebooks} />
+        {ebooks.items.length === 0 && <EbookPromo t={t} count={0} />}
       </div>
     </div>
   );

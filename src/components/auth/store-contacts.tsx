@@ -1,6 +1,5 @@
-import { Phone } from "lucide-react";
 import { TelegramIcon, WhatsappIcon } from "@/components/brand/social-icons";
-import { formatPhone, phoneHref, whatsappHref } from "@/lib/phone";
+import { formatPhone, whatsappHref } from "@/lib/phone";
 import { getI18n } from "@/lib/i18n/server";
 import type { StoreSettings } from "@/types/app";
 
@@ -10,14 +9,6 @@ export async function StoreContacts({ settings }: { settings: StoreSettings | nu
   if (!settings) return null;
 
   const items = [
-    settings.contact_phone && {
-      key: "phone",
-      href: phoneHref(settings.contact_phone),
-      icon: <Phone className="size-[18px]" aria-hidden />,
-      label: t("auth.register.soonPhone"),
-      value: formatPhone(settings.contact_phone),
-      external: false,
-    },
     settings.whatsapp_phone && {
       key: "whatsapp",
       href: whatsappHref(settings.whatsapp_phone),

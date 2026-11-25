@@ -15,25 +15,38 @@ export function defaultFormat(book: BookCardData): "paper" | "ebook" | null {
   return null;
 }
 
+/** Format a card is shown in: "paper" / "ebook" keeps the two kinds apart on shelves and in the catalog */
+export type CardFormat = "paper" | "ebook";
+
+function cardFormat(book: BookCardData, only?: CardFormat): "paper" | "ebook" | null {
+  if (only === "paper") return book.paper_enabled && book.stock > 0 ? "paper" : null;
+  if (only === "ebook") return book.ebook_available ? "ebook" : null;
+  return defaultFormat(book);
+}
+
 /** Book card from the catalog grid in the design */
 export function BookCard({
   book,
   priority,
   className,
   compact,
+  only,
 }: {
   book: BookCardData;
   priority?: boolean;
   className?: string;
   /** phone variant (smaller paddings, no author line) */
   compact?: boolean;
+  /** show only this format (price, badge and «+» button), never the other one */
+  only?: CardFormat;
 }) {
   const { t, locale } = useI18n();
-  const format = defaultFormat(book);
+  const format = cardFormat(book, only);
   const genre = locale === "ru" ? book.genre_name_ru : book.genre_name_kk;
-  const price = format === "ebook" ? book.ebook_final_price : (book.paper_final_price ?? book.min_price);
-  const original = format === "ebook" ? book.ebook_price : book.paper_price;
-  const onlyEbook = !book.paper_enabled && book.ebook_available;
+  const isEbook = format === "ebook" || only === "ebook";
+  const price = isEbook ? book.ebook_final_price : (book.paper_final_price ?? book.min_price);
+  const original = isEbook ? book.ebook_price : book.paper_price;
+  const onlyEbook = only === "ebook" || (only !== "paper" && !book.paper_enabled && book.ebook_available);
   const outOfStock = format === null;
   // The badge must match the price shown on the card (discount_pct is the best over both formats).
   const discountPct =
@@ -68,7 +81,7 @@ export function BookCard({
             coverUrl={book.cover_url}
             palette={book.cover_palette}
             size={compact ? "sm" : "md"}
-            ebookBadge={book.ebook_available ? t("common.format.ebookBadge") : null}
+            ebookBadge={book.ebook_available && only !== "paper" ? t("common.format.ebookBadge") : null}
             discountPct={outOfStock ? null : discountPct}
             priority={priority}
           />
@@ -144,10 +157,12 @@ export function BookGrid({
   books,
   className,
   priorityCount = 0,
+  only,
 }: {
   books: BookCardData[];
   className?: string;
   priorityCount?: number;
+  only?: CardFormat;
 }) {
   return (
     <div
@@ -157,7 +172,7 @@ export function BookGrid({
       )}
     >
       {books.map((book, i) => (
-        <BookCard key={book.id} book={book} priority={i < priorityCount} />
+        <BookCard key={book.id} book={book} priority={i < priorityCount} only={only} />
       ))}
     </div>
   );
